@@ -2,6 +2,7 @@ import express from 'express';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import courseRoutes from './routes/courseRoutes.js';
 import 'dotenv/config';
 
 const app = express();
@@ -17,12 +18,18 @@ app.get('/', (req, res) => {
         login: 'POST /api/auth/login',
         ping: 'GET /api/auth',
       },
+      courses: {
+        getAllCourses: 'GET /api/courses',
+        getCourseCatalog: 'GET /api/courses/catalog',
+      },
     },
   });
 });
 
-app.use('/api/users', userRoutes);
+
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
 
 const PORT = process.env.PORT || 5000;
 
