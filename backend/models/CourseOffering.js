@@ -1,34 +1,27 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
 
 const offeringSchema = new mongoose.Schema(
     {
         courseId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Course",
-            unique: true,
+            
             required: true,
         },
         semester: {
             type: String,
             required: true,
-            unique: true,
             enum: ["Spring", "Summer", "Fall", "Winter"],
         },
         year: {
             type: Number,
             required: true,
-            unique: true,
             min: 2000,
         },
         facultyId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
-        },
-        schedule: {
-            type: Date,
-            trim: true,
         },
         capacity: {
             type: Number,
@@ -39,8 +32,64 @@ const offeringSchema = new mongoose.Schema(
             type: Number,
             default: 0,
             min: 0,
-        }
-    }
+        },
+        section:{   
+            type: String,
+            trim: true,
+            default: "A",
+        },
+        status:{
+            default: "Open",
+            type: String,
+            enum: ["Open", "Closed"],
+        },
+        meetings: [
+            {
+                day: {
+                    type: String,
+                    required: true,
+                    enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                },
+                startTime: {
+                    type: String,
+                    required: true,
+                    validate: {
+                        validator: function (v) {
+                            return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
+                        }
+                    }
+                },
+                endTime: {
+                    type: String,
+                    required: true,
+                    validate: {
+                        validator: function (v) {
+                            return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
+                        }
+                    }
+                },
+                building: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                },
+                room: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                }
+            }
+        ],
+        enrollStarts: {
+            type: Date,
+            required: true,
+        },
+        enrollEnds: {
+            type: Date,
+            required: true,
+        },
+    },
+    { timestamps: true }
 );
-
+offeringSchema.index({ courseId: 1, semester: 1, year: 1, section: 1 }, { unique: true });
 export default mongoose.model("CourseOffering", offeringSchema);

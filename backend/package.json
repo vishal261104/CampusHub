@@ -5,7 +5,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "lint": "eslint . --ext .js"
+    
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -14,5 +16,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.4",
     "nodemon": "^3.1.14"
+  },
+  "devDependencies": {
+    "eslint": "^10.0.3"
   }
 }

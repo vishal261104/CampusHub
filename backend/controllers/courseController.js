@@ -67,30 +67,6 @@ function sortCourses(courses) {
   courses.sort((a, b) => String(a.courseCode || '').localeCompare(String(b.courseCode || '')));
 }
 
-export async function getCourseCatalog(req, res) {
-  try {
-    const { semester, year } = req.query;
-    if (!semester || !year) {
-      return res
-        .status(400)
-        .json({ message: "semester and year are required" });
-    }
-    if (!["Spring", "Summer", "Fall"].includes(semester)) {
-      return res.status(400).json({ message: "Invalid semester" });
-    }
-    if (isNaN(year) || year < 2000 || year > 2100) {
-      return res.status(400).json({ message: "Invalid year" });
-    }
-    const offerings = await CourseOffering.find({ semester, year }).populate({
-      path: "courseId",
-      select: "courseCode courseTitle credits department description",
-    });
-
-    return res.status(200).json({ offerings });
-  } catch (err) {
-    return res.status(500).json({ message: err.message || "Server error" });
-  }
-}
 export async function getAllCourses(req, res) {
   try {
     const courses = await Course.find();
