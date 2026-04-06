@@ -384,3 +384,41 @@ export async function getOffering(req,res){
         return res.status(500).json({ message: err.message || 'Server error' });
     }
 }
+export async function assignFacultyToOffering(req, res) {
+  try {
+    const offeringId = req.params.id;
+    const { facultyId, facultyEmail } = req.body;
+
+    if (!facultyId && !facultyEmail) {
+      return res.status(400).json({ message: 'facultyId or facultyEmail is required' });
+    }
+
+    const facultyResolved = await resolveFacultyId({ facultyId, facultyEmail });
+    if (!facultyResolved.ok) {
+      return res.status(400).json({ message: facultyResolved.message });
+    }
+
+    const offering = await CourseOffering.findById(offeringId);
+    if (!offering) {
+      return res.status(404).json({ message: 'Course offering not found' });
+    }
+
+    if (String(offering.facultyId) === String(facultyResolved.facultyId)) {
+      return res.status(200).json({ message: 'Faculty already assigned', offering });
+    }
+
+    offering.facultyId = facultyResolved.facultyId;
+    await offering.save();
+
+    const populated = await CourseOffering.findById(offering._id)
+      .populate({ path: 'courseId', select: 'courseCode courseTitle credits department' })
+      .populate({ path: 'facultyId', select: 'name email role' });
+
+    return res.status(200).json({
+      message: 'Faculty assigned to course offering successfully',
+      offering: populated,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message || 'Server error' });
+  }
+}

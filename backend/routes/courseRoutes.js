@@ -1,6 +1,6 @@
 import express from "express";
 import { createCourse,updateCourse,deleteCourse,getCourse,getAllCourses } from "../controllers/courseController.js";
-import { createCourseOffering, getCourseCatalog, updateOffering ,deleteOffering,listOfferings,getOffering} from "../controllers/courseOfferingController.js";
+import { createCourseOffering, getCourseCatalog, updateOffering ,deleteOffering,listOfferings,getOffering,assignFacultyToOffering} from "../controllers/courseOfferingController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import authRoles from "../middleware/authRoles.js";
 
@@ -19,7 +19,7 @@ router.get('/course-offering/:id',authMiddleware,getOffering);
 router.put('/course-offering/:id',authMiddleware,authRoles('admin'),updateOffering);
 router.delete('/course-offering/:id',authMiddleware,authRoles('admin'),deleteOffering);
 router.get('/course-catalog',authMiddleware,getCourseCatalog);
-
+router.patch('/course-offering/:id/faculty',authMiddleware,authRoles('admin'),assignFacultyToOffering);
 
 router.get('/', (req, res) => {
     res.json({ message: 'Catalog route is working' });
