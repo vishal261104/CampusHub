@@ -6,6 +6,14 @@ function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(String(value));
 }
 
+const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+const VALID_SEMESTERS = ["Spring", "Summer", "Fall", "Winter"];
+
+function timeToMinutes(value) {
+  const [hours, minutes] = String(value).split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
 export async function enrollInCourse(req, res) {
   try {
     const offeringId = req.params.id;
@@ -183,3 +191,122 @@ export async function getEnrollments(req, res) {
   }
 }
 
+export async function getStudentTimetable(req, res) {
+  try {
+    const studentId = req.user?.id;
+    if (!studentId) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    const semester = req.query.semester;
+    const year = req.query.year !== undefined ? Number(req.query.year) : undefined;
+
+    if (semester && !VALID_SEMESTERS.includes(semester)) {
+      return res.status(400).json({ message: "Invalid semester filter" });
+    }
+
+    if (year !== undefined && (Number.isNaN(year) || year < 2000 || year > 2100)) {
+      return res.status(400).json({ message: "Invalid year filter" });
+    }
+
+    const enrollments = await Enrollment.find({ studentId, status: "Enrolled" })
+      .populate({
+        path: "courseOfferingId",
+        match: {
+          ...(semester ? { semester } : {}),
+          ...(year !== undefined ? { year } : {}),
+        },
+        populate: [
+          { path: "courseId", model: "Course", select: "courseCode courseTitle credits department" },
+          { path: "facultyId", model: "User", select: "name email role" },
+        ],
+      })
+      .lean();
+
+    const activeOfferings = enrollments
+      .map((entry) => entry.courseOfferingId)
+      .filter(Boolean);
+
+    const weekly = {
+      Monday: [],
+      Tuesday: [],
+      Wednesday: [],
+      Thursday: [],
+      Friday: [],
+    };
+
+    const courses = [];
+    const conflicts = [];
+
+    for (const offering of activeOfferings) {
+      const course = offering.courseId || {};
+      const faculty = offering.facultyId || {};
+
+      courses.push({
+        offeringId: offering._id,
+        courseCode: course.courseCode,
+        courseTitle: course.courseTitle,
+        credits: course.credits,
+        department: course.department,
+        section: offering.section,
+        semester: offering.semester,
+        year: offering.year,
+        facultyName: faculty.name,
+        facultyEmail: faculty.email,
+      });
+
+      for (const meeting of offering.meetings || []) {
+        if (!weekly[meeting.day]) {
+          continue;
+        }
+
+        weekly[meeting.day].push({
+          offeringId: offering._id,
+          courseCode: course.courseCode,
+          courseTitle: course.courseTitle,
+          section: offering.section,
+          facultyName: faculty.name,
+          building: meeting.building,
+          room: meeting.room,
+          day: meeting.day,
+          startTime: meeting.startTime,
+          endTime: meeting.endTime,
+        });
+      }
+    }
+
+    for (const day of DAY_ORDER) {
+      weekly[day].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+      for (let index = 0; index < weekly[day].length - 1; index += 1) {
+        const current = weekly[day][index];
+        const next = weekly[day][index + 1];
+
+        if (timeToMinutes(next.startTime) < timeToMinutes(current.endTime)) {
+          conflicts.push({
+            day,
+            first: current,
+            second: next,
+          });
+        }
+      }
+    }
+
+    const totalClassBlocks = DAY_ORDER.reduce((sum, day) => sum + weekly[day].length, 0);
+
+    return res.status(200).json({
+      filters: {
+        semester: semester || null,
+        year: year ?? null,
+      },
+      totalCourses: courses.length,
+      totalClassBlocks,
+      courses,
+      weekly,
+      conflicts,
+    });
+  }
+  catch (err) {
+    return res.status(500).json({ message: err.message || "Server error" });
+  }
+}
