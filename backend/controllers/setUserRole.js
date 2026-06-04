@@ -1,6 +1,6 @@
 import User from '../models/User.js';
 
-export async function setUserRole(req, res) {
+export async function setUserRole(req, res, next) {
     try {
         const targetUserId = req.params.id;
         const { role } = req.body;
@@ -29,6 +29,6 @@ export async function setUserRole(req, res) {
 
         return res.json({ message: 'User role updated', user: updated });
     } catch (err) {
-        return res.status(500).json({ message: err.message || 'Server error' });
+        return next(err);
     }
 }

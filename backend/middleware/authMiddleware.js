@@ -4,7 +4,10 @@ export default function authMiddleware(req, res, next) {
   try {
     const header = req.headers.authorization;
     if (!header || !header.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Not authorized' });
+      const err = new Error('Not authorized');
+      err.statusCode = 401;
+      err.code = 'AUTH_REQUIRED';
+      return next(err);
     }
 
     const token = header.slice('Bearer '.length);
@@ -17,6 +20,8 @@ export default function authMiddleware(req, res, next) {
     req.user = decoded;
     return next();
   } catch (err) {
-    return res.status(401).json({ message: 'Not authorized' });
+    err.statusCode = 401;
+    err.code = 'AUTH_INVALID';
+    return next(err);
   }
 }

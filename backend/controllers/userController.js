@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 
-export async function getMe(req, res) {
+export async function getMe(req, res, next) {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -12,10 +12,10 @@ export async function getMe(req, res) {
     }
     return res.status(200).json(user);
   } catch (err) {
-    return res.status(500).json({ message: err.message || "Server error" });
+    return next(err);
   }
 }
-export async function updateMe(req, res) {
+export async function updateMe(req, res, next) {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -42,10 +42,10 @@ export async function updateMe(req, res) {
     }
     return res.status(200).json(updated);
   } catch (err) {
-    return res.status(500).json({ message: err.message || "Server error" });
+    return next(err);
   }
 }
-export async function updatePassword(req, res) {
+export async function updatePassword(req, res, next) {
     try {
         const userId = req.user?.id;
         if (!userId) {
@@ -68,6 +68,6 @@ export async function updatePassword(req, res) {
         return res.status(200).json({ message: "Password updated successfully" });
     }
     catch (err) {
-        return res.status(500).json({ message: err.message || "Server error" });
+      return next(err);
     }
 }

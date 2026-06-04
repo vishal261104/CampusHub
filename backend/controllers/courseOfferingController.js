@@ -79,7 +79,7 @@ async function resolveCourseId({ courseId, courseCode }) {
 
     return { ok: false, message: 'courseId or courseCode is required' };
 }
-export async function getCourseCatalog(req, res) {
+export async function getCourseCatalog(req, res, next) {
   try {
         const { semester, year } = req.query;
     if (!semester || !year) {
@@ -130,10 +130,10 @@ export async function getCourseCatalog(req, res) {
         const count = await CourseOffering.countDocuments(filter);
         return res.status(200).json({ count, page, limit, offerings });
   } catch (err) {
-    return res.status(500).json({ message: err.message || "Server error" });
+        return next(err);
   }
 }
-export async function createCourseOffering(req, res) {
+export async function createCourseOffering(req, res, next) {
     try{
                 const { courseId, courseCode, semester, year ,facultyId, facultyEmail, capacity, section, status, meetings, enrollStarts, enrollEnds } = req.body;
         if (!semester || !year) {
@@ -197,10 +197,10 @@ export async function createCourseOffering(req, res) {
         if (err?.code === 11000) {
             return res.status(409).json({ message: 'Duplicate offering (course + semester + year + section)' });
         }
-        return res.status(500).json({ message: err.message || 'Server error' });
+        return next(err);
     }
 }
-export async function updateOffering(req,res){
+export async function updateOffering(req, res, next){
      try{
         const offeringId = req.params.id;
         const offering = await CourseOffering.findById(offeringId);
@@ -287,10 +287,10 @@ export async function updateOffering(req,res){
         if (err?.code === 11000) {
             return res.status(409).json({ message: 'Duplicate offering (course + semester + year + section)' });
         }
-        return res.status(500).json({ message: err.message || 'Server error' });
+        return next(err);
     }
 }
-export async function deleteOffering(req,res){
+export async function deleteOffering(req, res, next){
     try{
         const offeringId = req.params.id;
         const deleted = await CourseOffering.findByIdAndDelete(offeringId);
@@ -300,10 +300,10 @@ export async function deleteOffering(req,res){
         return res.status(200).json({ message: 'Course offering deleted successfully' });
     }
     catch (err) {
-        return res.status(500).json({ message: err.message || 'Server error' });
+        return next(err);
     }
 }
-export async function listOfferings(req,res){
+export async function listOfferings(req, res, next){
     try{
                                 const page = Math.max(1, toInt(req.query.page, 1));
                                 const limit = Math.min(100, Math.max(1, toInt(req.query.limit, 20)));
@@ -362,10 +362,10 @@ export async function listOfferings(req,res){
                 return res.status(200).json({ count, page, limit, offerings });
     }
     catch (err) {
-        return res.status(500).json({ message: err.message || 'Server error' });
+        return next(err);
     }
 }
-export async function getOffering(req,res){
+export async function getOffering(req, res, next){
     try{
         const offeringId = req.params.id;
         const offering = await CourseOffering.findById(offeringId).populate({
@@ -381,10 +381,10 @@ export async function getOffering(req,res){
         return res.status(200).json({ offering });
     }
     catch (err) {
-        return res.status(500).json({ message: err.message || 'Server error' });
+        return next(err);
     }
 }
-export async function assignFacultyToOffering(req, res) {
+export async function assignFacultyToOffering(req, res, next) {
   try {
     const offeringId = req.params.id;
     const { facultyId, facultyEmail } = req.body;
@@ -419,6 +419,6 @@ export async function assignFacultyToOffering(req, res) {
       offering: populated,
     });
   } catch (err) {
-    return res.status(500).json({ message: err.message || 'Server error' });
+        return next(err);
   }
 }

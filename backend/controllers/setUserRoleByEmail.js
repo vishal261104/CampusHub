@@ -1,6 +1,6 @@
 import User from '../models/User.js';
 
-export async function setUserRoleByEmail(req, res) {
+export async function setUserRoleByEmail(req, res, next) {
   try {
     const { email, role } = req.body;
     const userId = req.user.id;
@@ -37,6 +37,6 @@ export async function setUserRoleByEmail(req, res) {
 
     return res.json({ message: 'User role updated', user: updated });
   } catch (err) {
-    return res.status(500).json({ message: err.message || 'Server error' });
+    return next(err);
   }
 }

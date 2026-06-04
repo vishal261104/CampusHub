@@ -3,7 +3,7 @@ import Attendance from "../models/Attendance.js";
 import Enrollment from "../models/Enrollment.js";
 
 
-export async function getEnrolledStudents(req, res) {
+export async function getEnrolledStudents(req, res, next) {
   try {
     const { courseOfferingId } = req.params;
     const offering = await CourseOffering.findById(courseOfferingId).select("_id");
@@ -23,12 +23,12 @@ export async function getEnrolledStudents(req, res) {
       .filter(Boolean);
 
     return res.status(200).json({ students });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
+  } catch (err) {
+    return next(err);
   }
 }
 
-export async function markAttendance(req, res) {
+export async function markAttendance(req, res, next) {
   try {
     const facultyId = req.user.id;
     const { courseOfferingId, studentId, status, date } = req.body;
@@ -61,13 +61,13 @@ export async function markAttendance(req, res) {
       date,
     });
     return res.status(201).json({ attendance });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
+  } catch (err) {
+    return next(err);
   }
 }
 
 
-export async function getAttendance(req, res) {
+export async function getAttendance(req, res, next) {
 
    try {
 
@@ -107,11 +107,11 @@ export async function getAttendance(req, res) {
       return res.status(200).json(result);
 
    } catch(err) {
-     return res.status(500).json({ message: err.message || "Server error" });
+     return next(err);
    }
 }
 
-export async function getCourseAttendance(req, res) {//Faculty can view attendance records for their course offerings
+export async function getCourseAttendance(req, res, next) {//Faculty can view attendance records for their course offerings
     try {
         const facultyId = req.user.id;
         const { courseOfferingId } = req.params;
@@ -125,7 +125,7 @@ export async function getCourseAttendance(req, res) {//Faculty can view attendan
         const attendanceRecords = await Attendance.find({ courseOfferingId }).populate("studentId", "name rollNumber");
         return res.status(200).json({ attendance: attendanceRecords });
     }
-    catch (error) {
-        return res.status(500).json({ message: error.message });
+    catch (err) {
+      return next(err);
     }
 }

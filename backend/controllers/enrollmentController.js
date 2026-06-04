@@ -14,7 +14,7 @@ function timeToMinutes(value) {
   return hours * 60 + minutes;
 }
 
-export async function enrollInCourse(req, res) {
+export async function enrollInCourse(req, res, next) {
   try {
     const offeringId = req.params.id;
     const studentId = req.user?.id;
@@ -95,10 +95,10 @@ export async function enrollInCourse(req, res) {
           message: "Student is already enrolled in this course offering",
         });
     }
-    return res.status(500).json({ message: err.message || "Server error" });
+    return next(err);
   }
 }
-export async function dropCourse(req, res) {
+export async function dropCourse(req, res, next) {
   try {
     const offeringId = req.params.id;
     const studentId = req.user?.id;
@@ -132,10 +132,10 @@ export async function dropCourse(req, res) {
 
     return res.status(200).json({ message: "Course dropped successfully" });
   } catch (err) {
-    return res.status(500).json({ message: err.message || "Server error" });
+    return next(err);
   }
 }
-export async function getEnrollments(req, res) {
+export async function getEnrollments(req, res, next) {
   try {
     const studentId = req.user?.id;
     if (!studentId) {
@@ -187,11 +187,11 @@ export async function getEnrollments(req, res) {
       enrollments: filtered,
     });
   } catch (err) {
-    return res.status(500).json({ message: err.message || "Server error" });
+    return next(err);
   }
 }
 
-export async function getStudentTimetable(req, res) {
+export async function getStudentTimetable(req, res, next) {
   try {
     const studentId = req.user?.id;
     if (!studentId) {
@@ -307,6 +307,6 @@ export async function getStudentTimetable(req, res) {
     });
   }
   catch (err) {
-    return res.status(500).json({ message: err.message || "Server error" });
+    return next(err);
   }
 }
