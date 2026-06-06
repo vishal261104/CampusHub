@@ -8,7 +8,7 @@ const router=express.Router();
 
 router.get('/catalog',authMiddleware,getAllCourses);
 router.post('/course',authMiddleware,authRoles('admin'),createCourse);
-router.get('/course/:id',authMiddleware,authRoles('admin'),getCourse);
+router.get('/course/:id',authMiddleware,getCourse); // Anyone authenticated can view a course details
 router.put('/course/:id',authMiddleware,authRoles('admin'),updateCourse);
 router.delete('/course/:id',authMiddleware,authRoles('admin'),deleteCourse);
 

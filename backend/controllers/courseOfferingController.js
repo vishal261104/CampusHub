@@ -81,56 +81,83 @@ async function resolveCourseId({ courseId, courseCode }) {
 }
 export async function getCourseCatalog(req, res, next) {
   try {
-        const { semester, year } = req.query;
-    if (!semester || !year) {
-      return res
-        .status(400)
-        .json({ message: "semester and year are required" });
-    }
-    if (!["Spring", "Summer", "Fall","Winter"].includes(semester)) {
+    const { semester, year, status, courseCode, search, department } = req.query;
+    
+    if (semester && !["Spring", "Summer", "Fall", "Winter"].includes(semester)) {
       return res.status(400).json({ message: "Invalid semester" });
     }
-    if (isNaN(year) || year < 2000 || year > 2100) {
+    if (year !== undefined && (isNaN(year) || year < 2000 || year > 2100)) {
       return res.status(400).json({ message: "Invalid year" });
     }
-        const page = Math.max(1, toInt(req.query.page, 1));
-        const limit = Math.min(100, Math.max(1, toInt(req.query.limit, 20)));
-        const skip = (page - 1) * limit;
 
-        const filter = { semester, year: Number(year) };
-        const status = req.query.status;
-        if (status) {
-            if (!["Open", "Closed"].includes(status)) {
-                return res.status(400).json({ message: 'Invalid status' });
-            }
-            filter.status = status;
+    const page = Math.max(1, toInt(req.query.page, 1));
+    const limit = Math.min(100, Math.max(1, toInt(req.query.limit, 20)));
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    if (semester) filter.semester = semester;
+    if (year !== undefined) filter.year = Number(year);
+    
+    if (status) {
+      if (!["Open", "Closed"].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status' });
+      }
+      filter.status = status;
+    }
+
+    if (courseCode) {
+      const courseResolved = await resolveCourseId({ courseCode });
+      if (!courseResolved.ok) {
+        return res.status(400).json({ message: courseResolved.message });
+      }
+      filter.courseId = courseResolved.courseId;
+    }
+
+    // Handle Search and Department filters
+    const courseFilter = {};
+    if (search) {
+      const searchRegex = { $regex: String(search), $options: "i" };
+      courseFilter.$or = [
+        { courseTitle: searchRegex },
+        { courseCode: searchRegex }
+      ];
+    }
+    if (department) {
+      courseFilter.department = { $regex: String(department), $options: "i" };
+    }
+
+    if (Object.keys(courseFilter).length > 0) {
+      const matchingCourses = await Course.find(courseFilter).select('_id').lean();
+      const courseIds = matchingCourses.map(c => c._id);
+      
+      // If courseCode was already provided, intersect the IDs
+      if (filter.courseId) {
+        if (!courseIds.some(id => String(id) === String(filter.courseId))) {
+          // The specific courseCode requested does not match the search/dept filter
+          return res.status(200).json({ count: 0, page, limit, offerings: [] });
         }
+      } else {
+        filter.courseId = { $in: courseIds };
+      }
+    }
 
-        if (req.query.courseCode) {
-            const courseResolved = await resolveCourseId({ courseCode: req.query.courseCode });
-            if (!courseResolved.ok) {
-                return res.status(400).json({ message: courseResolved.message });
-            }
-            filter.courseId = courseResolved.courseId;
-        }
+    const offerings = await CourseOffering.find(filter)
+      .populate({
+        path: "courseId",
+        select: "courseCode courseTitle credits department description",
+      })
+      .populate({
+        path: "facultyId",
+        select: "name email role",
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-        const offerings = await CourseOffering.find(filter)
-            .populate({
-                path: "courseId",
-                select: "courseCode courseTitle credits department description",
-            })
-            .populate({
-                path: "facultyId",
-                select: "name email role",
-            })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
-
-        const count = await CourseOffering.countDocuments(filter);
-        return res.status(200).json({ count, page, limit, offerings });
+    const count = await CourseOffering.countDocuments(filter);
+    return res.status(200).json({ count, page, limit, offerings });
   } catch (err) {
-        return next(err);
+    return next(err);
   }
 }
 export async function createCourseOffering(req, res, next) {
@@ -337,12 +364,23 @@ export async function listOfferings(req, res, next){
                                     }
                                     filter.courseId = courseResolved.courseId;
                                 }
-                                if (req.query.facultyEmail) {
-                                    const facultyResolved = await resolveFacultyId({ facultyEmail: req.query.facultyEmail });
-                                    if (!facultyResolved.ok) {
-                                        return res.status(400).json({ message: facultyResolved.message });
+                                if (req.user && req.user.role === 'faculty') {
+                                    filter.facultyId = req.user.id;
+                                } else {
+                                    if (req.query.facultyEmail) {
+                                        const facultyResolved = await resolveFacultyId({ facultyEmail: req.query.facultyEmail });
+                                        if (!facultyResolved.ok) {
+                                            return res.status(400).json({ message: facultyResolved.message });
+                                        }
+                                        filter.facultyId = facultyResolved.facultyId;
                                     }
-                                    filter.facultyId = facultyResolved.facultyId;
+                                    if (req.query.facultyName) {
+                                        const faculties = await User.find({
+                                            role: 'faculty',
+                                            name: { $regex: String(req.query.facultyName), $options: 'i' }
+                                        });
+                                        filter.facultyId = { $in: faculties.map(f => f._id) };
+                                    }
                                 }
 
                                 const offerings = await CourseOffering.find(filter)

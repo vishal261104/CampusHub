@@ -5,9 +5,9 @@ import authRoles from "../middleware/authRoles.js";
 
 const router = express.Router();
 
-router.get("/attendance/students/:courseOfferingId/", authMiddleware, authRoles("faculty"), getEnrolledStudents);
-router.post("/attendance/mark", authMiddleware, authRoles("faculty"), markAttendance);
-router.get("/attendance/course-offering/:courseOfferingId/", authMiddleware, authRoles("faculty"), getCourseAttendance);
-router.get("/attendance/my/", authMiddleware, authRoles("student"), getAttendance);
+router.get("/students/:courseOfferingId/", authMiddleware, authRoles("faculty"), getEnrolledStudents);
+router.post("/mark", authMiddleware, authRoles("faculty"), markAttendance);
+router.get("/course-offering/:courseOfferingId/", authMiddleware, authRoles("faculty"), getCourseAttendance);
+router.get("/my/", authMiddleware, authRoles("student"), getAttendance);
 
 export default router;

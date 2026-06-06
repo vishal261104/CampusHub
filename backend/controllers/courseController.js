@@ -46,12 +46,10 @@ export async function updateCourse(req, res, next) {
       !department &&
       !description
     ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "At least one field (courseCode, courseTitle, credits, department, description) is required to update",
-        });
+      return res.status(400).json({
+        message:
+          "At least one field (courseCode, courseTitle, credits, department, description) is required to update",
+      });
     }
     const updated = await Course.findByIdAndUpdate(
       courseId,
@@ -98,12 +96,29 @@ export async function getAllCourses(req, res, next) {
     Math.max(1, Number.parseInt(String(req.query.limit || "20"), 10) || 20),
   );
   const skip = (page - 1) * limit;
+  const filter = {};
+  if(req.query.department){
+    filter.department = req.query.department;
+  }
+  if (req.query.search) {
+    const searchRegex = { $regex: String(req.query.search), $options: "i" };
+    filter.$or = [
+      { courseTitle: searchRegex },
+      { department: searchRegex },
+      { courseCode: searchRegex },
+    ];
+  }
+
   try {
     const [courses, count] = await Promise.all([
-      Course.find().sort({ courseCode: 1 }).skip(skip).limit(limit).lean(),
-      Course.countDocuments(),
+      Course.find(filter)
+        .sort({ courseCode: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Course.countDocuments(filter),
     ]);
-    return res.status(200).json({ count, page, limit,courses });
+    return res.status(200).json({ count, page, limit, courses });
   } catch (err) {
     return next(err);
   }
