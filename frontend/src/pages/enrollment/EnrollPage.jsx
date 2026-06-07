@@ -23,7 +23,7 @@ export default function EnrollPage() {
     try {
       const [offerRes, enrRes] = await Promise.all([
         getCourseCatalog({ semester, year }),
-        getEnrollments({ status: 'Enrolled' }),
+        getEnrollments({ status: 'Enrolled,Pending_Enroll,Pending_Drop' }),
       ]);
       setOfferings(offerRes.data.offerings || []);
       setEnrollments(enrRes.data.enrollments || []);
@@ -34,7 +34,10 @@ export default function EnrollPage() {
 
   useEffect(() => { fetchOfferings(); }, [semester, year]);
 
-  const enrolledIds = new Set(enrollments.map((e) => e.courseOfferingId?._id || e.courseOfferingId));
+  const enrolledMap = new Map();
+  enrollments.forEach((e) => {
+    enrolledMap.set(e.courseOfferingId?._id || e.courseOfferingId, e.status);
+  });
 
   const handleEnroll = async (offeringId) => {
     setActionId(offeringId);
@@ -97,11 +100,22 @@ export default function EnrollPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((o) => {
             const course = o.courseId || {};
-            const isEnrolled = enrolledIds.has(o._id);
+            const enrollmentStatus = enrolledMap.get(o._id);
+            const isEnrolled = enrollmentStatus === 'Enrolled';
+            const isPendingEnroll = enrollmentStatus === 'Pending_Enroll';
+            const isPendingDrop = enrollmentStatus === 'Pending_Drop';
+            const isActionable = !isPendingEnroll && !isPendingDrop;
+            
             const isFull = o.enrolledCount >= o.capacity;
             const isClosed = o.status === 'Closed';
             const isProcessing = actionId === o._id;
             const fillPct = Math.min(100, Math.round((o.enrolledCount / o.capacity) * 100));
+
+            let statusBadge = { variant: 'primary', text: 'Open' };
+            if (isClosed) statusBadge = { variant: 'danger', text: 'Closed' };
+            else if (isEnrolled) statusBadge = { variant: 'success', text: 'Enrolled' };
+            else if (isPendingEnroll) statusBadge = { variant: 'warning', text: 'Pending Enroll' };
+            else if (isPendingDrop) statusBadge = { variant: 'warning', text: 'Pending Drop' };
 
             return (
               <div key={o._id} className={`card p-5 flex flex-col gap-3 transition-all hover:shadow-md ${isEnrolled ? 'ring-2 ring-emerald-400 ring-offset-1' : ''}`}>
@@ -110,9 +124,7 @@ export default function EnrollPage() {
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{course.courseCode}</p>
                     <h3 className="text-sm font-semibold text-slate-900 leading-tight mt-0.5">{course.courseTitle}</h3>
                   </div>
-                  <Badge variant={isClosed ? 'danger' : isEnrolled ? 'success' : 'primary'}>
-                    {isClosed ? 'Closed' : isEnrolled ? 'Enrolled' : 'Open'}
-                  </Badge>
+                  <Badge variant={statusBadge.variant}>{statusBadge.text}</Badge>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
@@ -143,11 +155,15 @@ export default function EnrollPage() {
                 <div className="flex gap-2 pt-1">
                   {isEnrolled ? (
                     <Button variant="danger" size="sm" className="flex-1" loading={isProcessing} onClick={() => handleDrop(o._id)}>
-                      <X size={13} /> Drop Course
+                      <X size={13} /> Request Drop
+                    </Button>
+                  ) : isPendingEnroll || isPendingDrop ? (
+                    <Button variant="secondary" size="sm" className="flex-1" disabled>
+                      Processing...
                     </Button>
                   ) : (
                     <Button size="sm" className="flex-1" disabled={isClosed || isFull || isProcessing} loading={isProcessing} onClick={() => handleEnroll(o._id)}>
-                      <Check size={13} /> {isFull ? 'Full' : 'Enroll'}
+                      <Check size={13} /> {isFull ? 'Full' : 'Request Enroll'}
                     </Button>
                   )}
                 </div>

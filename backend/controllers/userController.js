@@ -6,7 +6,7 @@ export async function getMe(req, res, next) {
     if (!userId) {
       return res.status(401).json({ message: "Not authorized" });
     }
-    const user = await User.findById(userId).select("name email role");
+    const user = await User.findById(userId).select('name email role gender studentId employeeId');
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -36,7 +36,7 @@ export async function updateMe(req, res, next) {
     const updated = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
       runValidators: true,
-    }).select("name email role");
+    }).select('name email role gender studentId employeeId');
     if (!updated) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -70,4 +70,13 @@ export async function updatePassword(req, res, next) {
     catch (err) {
       return next(err);
     }
+}
+
+export async function getAllUsers(req, res, next) {
+  try {
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    return res.status(200).json(users);
+  } catch (err) {
+    return next(err);
+  }
 }

@@ -1,6 +1,12 @@
 import Course from "../models/Course.js";
 import CourseOffering from "../models/CourseOffering.js";
 
+/**
+ * Creates a new course in the course catalog.
+ * @param {Object} req - Express request object containing course details.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 export async function createCourse(req, res, next) {
   try {
     const { courseCode, courseTitle, credits, department, description } =
@@ -21,6 +27,12 @@ export async function createCourse(req, res, next) {
   }
 }
 
+/**
+ * Retrieves a specific course by its ID.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 export async function getCourse(req, res, next) {
   try {
     const courseId = req.params.id;
@@ -34,6 +46,12 @@ export async function getCourse(req, res, next) {
   }
 }
 
+/**
+ * Updates an existing course's details.
+ * @param {Object} req - Express request object containing updated course data.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 export async function updateCourse(req, res, next) {
   try {
     const courseId = req.params.id;
@@ -67,6 +85,12 @@ export async function updateCourse(req, res, next) {
   }
 }
 
+/**
+ * Deletes a course from the catalog.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 export async function deleteCourse(req, res, next) {
   try {
     const courseId = req.params.id;
@@ -80,12 +104,22 @@ export async function deleteCourse(req, res, next) {
   }
 }
 
+/**
+ * Helper function to sort courses alphabetically by courseCode.
+ * @param {Array} courses - Array of course objects.
+ */
 function sortCourses(courses) {
   courses.sort((a, b) =>
     String(a.courseCode || "").localeCompare(String(b.courseCode || "")),
   );
 }
 
+/**
+ * Retrieves a paginated list of all courses, optionally filtered by department.
+ * @param {Object} req - Express request object containing query parameters.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 export async function getAllCourses(req, res, next) {
   const page = Math.max(
     1,
@@ -98,7 +132,7 @@ export async function getAllCourses(req, res, next) {
   const skip = (page - 1) * limit;
   const filter = {};
   if(req.query.department){
-    filter.department = req.query.department;
+    filter.department = { $regex: String(req.query.department), $options: 'i' };
   }
   if (req.query.search) {
     const searchRegex = { $regex: String(req.query.search), $options: "i" };

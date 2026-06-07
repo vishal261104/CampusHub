@@ -14,13 +14,19 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [shake, setShake] = useState(false);
 
   const validate = () => {
     const e = {};
     if (!form.email) e.email = 'Email is required';
     if (!form.password) e.password = 'Password is required';
     setErrors(e);
-    return Object.keys(e).length === 0;
+    if (Object.keys(e).length > 0) {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e) => {
@@ -34,6 +40,8 @@ export default function LoginPage() {
       navigate('/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
     } finally {
       setLoading(false);
     }
@@ -43,7 +51,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary-950 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 animate-fade-in">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-600 mb-4 shadow-lg shadow-primary-900/50">
             <GraduationCap size={28} className="text-white" />
           </div>
@@ -52,7 +60,7 @@ export default function LoginPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-7 shadow-2xl">
+        <div className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-7 shadow-2xl animate-slide-up ${shake ? 'animate-shake' : ''}`}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Email address</label>

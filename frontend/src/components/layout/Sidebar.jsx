@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BookOpen, GraduationCap, CalendarCheck, ClipboardList,
-  Settings, LogOut, ChevronRight, BookMarked, ClipboardCheck
+  Settings, LogOut, ChevronRight, BookMarked, ClipboardCheck, Home, Users
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import ProfileCard from '../ui/ProfileCard';
 import toast from 'react-hot-toast';
 
 const navConfig = {
@@ -13,6 +14,7 @@ const navConfig = {
     { label: 'Enroll / Drop', to: '/enrollment/browse', icon: GraduationCap },
     { label: 'My Timetable', to: '/enrollment/timetable', icon: CalendarCheck },
     { label: 'My Attendance', to: '/attendance/my', icon: ClipboardList },
+    { label: 'Hostel', to: '/hostel', icon: Home },
   ],
   faculty: [
     { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
@@ -23,8 +25,11 @@ const navConfig = {
   admin: [
     { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
     { label: 'Courses', to: '/courses/manage', icon: BookOpen },
+    { label: 'Manage Users', to: '/users/manage', icon: Users },
     { label: 'Course Offerings', to: '/courses/offerings', icon: BookMarked },
     { label: 'Course Catalog', to: '/courses/catalog', icon: GraduationCap },
+    { label: 'Enrollment Requests', to: '/enrollment/admin', icon: ClipboardList },
+    { label: 'Hostel Applications', to: '/hostel/admin', icon: Home },
   ],
 };
 
@@ -44,9 +49,9 @@ export default function Sidebar({ onClose }) {
   return (
     <div className="flex flex-col h-full bg-white border-r border-slate-200 w-64 flex-shrink-0 relative z-10">
       {/* Logo */}
-      <div onClick={() => navigate('/dashboard')} className="px-5 py-5 border-b border-slate-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors">
-        <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center flex-shrink-0 shadow-sm shadow-primary-600/20">
-          <GraduationCap size={16} className="text-white" />
+      <div onClick={() => navigate('/dashboard')} className="px-5 py-5 border-b border-slate-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors group">
+        <div className="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg border border-slate-200 bg-white shadow-sm transition-shadow group-hover:shadow-md">
+          <span className="font-serif text-xl font-extrabold text-slate-900 leading-none tracking-tighter">C</span>
         </div>
         <div>
           <p className="font-bold text-sm text-slate-900 tracking-tight">CampusHub</p>
@@ -55,16 +60,14 @@ export default function Sidebar({ onClose }) {
       </div>
 
       {/* User info */}
-      <div className="px-4 py-4 border-b border-slate-100">
-        <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group" onClick={() => { navigate('/profile'); onClose?.(); }}>
-          <div className={`w-8 h-8 rounded-full ${roleColors[user?.role] || 'bg-slate-300'} flex items-center justify-center flex-shrink-0 text-white`}>
-            <span className="text-xs font-semibold">{user?.name?.charAt(0)?.toUpperCase()}</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-slate-800 truncate">{user?.name}</p>
-            <p className="text-[11px] text-slate-500 capitalize">{user?.role}</p>
-          </div>
-          <ChevronRight size={14} className="text-slate-400 group-hover:text-slate-600 transition-colors flex-shrink-0" />
+      <div className="px-4 py-4 border-b border-slate-100 flex justify-center">
+        <div onClick={() => { navigate('/profile'); onClose?.(); }} className="cursor-pointer w-full">
+          <ProfileCard
+            imageSrc={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'default'}&hair=${user?.gender === 'Female' ? 'longHairBigHair,longHairBob,longHairBun,longHairCurly,longHairCurvy,longHairDreads,longHairFrida,longHairFro,longHairFroBand,longHairMiaWallace,longHairStraight,longHairStraight2,longHairStraightStrand' : 'shortHairDreads01,shortHairDreads02,shortHairFrizzle,shortHairShaggyMullet,shortHairShortCurly,shortHairShortFlat,shortHairShortRound,shortHairShortWaved,shortHairSides,shortHairTheCaesar,shortHairTheCaesarSidePart'}&facialHairProbability=${user?.gender === 'Female' ? 0 : 10}`}
+            name={user?.name || 'User'}
+            role={user?.role || 'Guest'}
+            className="w-full"
+          />
         </div>
       </div>
 

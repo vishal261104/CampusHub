@@ -28,6 +28,30 @@ const userSchema = new mongoose.Schema(
       default: 'student',
       required: true,
     },
+    gender: {
+      type: String,
+      enum: ['Male', 'Female'],
+    },
+    // Unique college ID — only for students and faculty
+    studentId: {
+      type: String,
+      sparse: true,   // allows multiple null (admins/faculty won't have this)
+      unique: true,
+      trim: true,
+    },
+    employeeId: {
+      type: String,
+      sparse: true,   // allows multiple null (students/admins won't have this)
+      unique: true,
+      trim: true,
+    },
+    joinYear: {
+      type: Number,
+    },
+    department: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 );

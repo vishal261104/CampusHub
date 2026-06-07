@@ -7,6 +7,7 @@ export default function Button({
     primary: 'btn-primary',
     secondary: 'btn-secondary',
     danger: 'btn-danger',
+    success: 'btn-success',
     ghost: 'inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-slate-600 text-sm font-medium transition-all duration-150 hover:bg-slate-100',
   };
   const sizes = { sm: 'text-xs px-3 py-1.5', md: '', lg: 'text-base px-5 py-3' };

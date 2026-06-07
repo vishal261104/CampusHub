@@ -6,6 +6,7 @@ import userRoutes from './routes/userRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import enrollmentRoutes from './routes/enrollmentRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
+import hostelRoutes from './routes/hostelRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import 'dotenv/config';
 
@@ -70,6 +71,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/hostel', hostelRoutes);
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });

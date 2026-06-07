@@ -38,6 +38,7 @@ function StudentDashboard() {
   const [enrollments, setEnrollments] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     Promise.all([
@@ -63,9 +64,33 @@ function StudentDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-slate-900">Good day! 👋</h2>
-        <p className="text-slate-500 text-sm mt-0.5">Here's your academic overview</p>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary-50 rounded-lg flex items-center justify-center">
+            <span className="text-xl leading-none">👋</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 leading-tight">Good day!</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Here's your academic overview</p>
+          </div>
+        </div>
+        <hr className="mt-4 mb-6 border-slate-100" />
       </div>
+
+      {/* Registration banner — show if student has no studentId */}
+      {!user?.studentId && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-center gap-4 animate-slide-up">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <AlertCircle size={20} className="text-amber-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-amber-800">Complete your registration</h3>
+            <p className="text-xs text-amber-700 mt-0.5">You need a Student ID to access hostel, attendance, and enrollment features.</p>
+          </div>
+          <a href="/register-student" className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-xl hover:bg-amber-700 transition-colors flex-shrink-0">
+            Register Now
+          </a>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard label="Enrolled Courses" value={enrollments.length} sub="Active semester" icon={BookOpen} color="indigo" loading={loading} />
@@ -147,8 +172,16 @@ function FacultyDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-slate-900">Faculty Dashboard 👨‍🏫</h2>
-        <p className="text-slate-500 text-sm mt-0.5">Manage your courses and attendance</p>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary-50 rounded-lg flex items-center justify-center">
+            <span className="text-xl leading-none">👨‍🏫</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 leading-tight">Faculty Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Manage your courses and attendance</p>
+          </div>
+        </div>
+        <hr className="mt-4 mb-6 border-slate-100" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -213,8 +246,16 @@ function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-slate-900">Admin Dashboard 🏛️</h2>
-        <p className="text-slate-500 text-sm mt-0.5">System-wide overview</p>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary-50 rounded-lg flex items-center justify-center">
+            <span className="text-xl leading-none">🏛️</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 leading-tight">Admin Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-0.5">System-wide overview</p>
+          </div>
+        </div>
+        <hr className="mt-4 mb-6 border-slate-100" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

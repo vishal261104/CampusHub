@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Key, Shield, Save, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Key, Shield, Save, Eye, EyeOff, Hash } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { updateMe, updatePassword, setUserRoleByEmail } from '../../api/users';
 import Input from '../../components/ui/Input';
@@ -14,7 +14,7 @@ export default function ProfilePage() {
   const { user, setUser } = useAuth();
   const [profileForm, setProfileForm] = useState({ name: user?.name || '', email: user?.email || '' });
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-  const [roleForm, setRoleForm] = useState({ email: '', role: 'student' });
+  const [roleForm, setRoleForm] = useState({ email: '', role: 'student', gender: '', studentId: '', employeeId: '' });
   const [showPw, setShowPw] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPw, setSavingPw] = useState(false);
@@ -61,15 +61,20 @@ export default function ProfilePage() {
   const handleSetRole = async () => {
     setSavingRole(true);
     try {
-      await setUserRoleByEmail(roleForm.email, roleForm.role);
+      const payload = { email: roleForm.email, role: roleForm.role };
+      if (roleForm.gender) payload.gender = roleForm.gender;
+      if (roleForm.role === 'student' && roleForm.studentId) payload.studentId = roleForm.studentId;
+      if (roleForm.role === 'faculty' && roleForm.employeeId) payload.employeeId = roleForm.employeeId;
+      await setUserRoleByEmail(roleForm.email, payload.role, payload);
       toast.success('User role updated!');
-      setRoleForm({ email: '', role: 'student' });
+      setRoleForm({ email: '', role: 'student', gender: '', studentId: '', employeeId: '' });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to set role');
     } finally { setSavingRole(false); }
   };
 
   const roleColor = user?.role === 'admin' ? '#7c3aed' : user?.role === 'faculty' ? '#10b981' : '#6366f1';
+  const universityId = user?.studentId || user?.employeeId;
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -78,14 +83,40 @@ export default function ProfilePage() {
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0" style={{ backgroundColor: roleColor }}>
           {user?.name?.charAt(0)?.toUpperCase()}
         </div>
-        <div>
+        <div className="flex-1 min-w-0">
           <h2 className="text-xl font-bold text-slate-900">{user?.name}</h2>
           <p className="text-slate-400 text-sm">{user?.email}</p>
-          <div className="mt-1.5">
+          <div className="mt-2 flex items-center gap-2 flex-wrap">
             <Badge variant={ROLE_COLORS[user?.role] || 'default'}>{ROLE_LABELS[user?.role] || user?.role}</Badge>
+            {universityId && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold font-mono">
+                <Hash size={11} />
+                {universityId}
+              </span>
+            )}
+            {user?.gender && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-600 text-xs font-medium">
+                {user.gender}
+              </span>
+            )}
           </div>
         </div>
       </div>
+
+      {/* ID Card — students and faculty */}
+      {universityId && (
+        <div className="card p-5 flex items-center gap-4 border-l-4 border-primary-500">
+          <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 flex-shrink-0">
+            <Hash size={18} />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              {user?.role === 'student' ? 'Student ID' : 'Employee ID'}
+            </p>
+            <p className="text-lg font-bold text-slate-800 font-mono mt-0.5">{universityId}</p>
+          </div>
+        </div>
+      )}
 
       {/* Update Profile */}
       <div className="card p-6 space-y-4">
@@ -145,7 +176,7 @@ export default function ProfilePage() {
         <div className="card p-6 space-y-4">
           <div className="flex items-center gap-2 mb-1">
             <Shield size={16} className="text-violet-600" />
-            <h3 className="text-sm font-semibold text-slate-800">Manage User Roles</h3>
+            <h3 className="text-sm font-semibold text-slate-800">Manage Users</h3>
           </div>
           <Input
             label="User Email"
@@ -154,20 +185,53 @@ export default function ProfilePage() {
             onChange={(e) => setRoleForm({ ...roleForm, email: e.target.value })}
             placeholder="user@university.edu"
           />
-          <div>
-            <label className="form-label">Assign Role</label>
-            <select
-              value={roleForm.role}
-              onChange={(e) => setRoleForm({ ...roleForm, role: e.target.value })}
-              className="form-input"
-            >
-              <option value="student">Student</option>
-              <option value="faculty">Faculty</option>
-              <option value="admin">Admin</option>
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="form-label">Assign Role</label>
+              <select
+                value={roleForm.role}
+                onChange={(e) => setRoleForm({ ...roleForm, role: e.target.value, studentId: '', employeeId: '' })}
+                className="form-input"
+              >
+                <option value="student">Student</option>
+                <option value="faculty">Faculty</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label className="form-label">Gender</label>
+              <select
+                value={roleForm.gender}
+                onChange={(e) => setRoleForm({ ...roleForm, gender: e.target.value })}
+                className="form-input"
+              >
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
           </div>
+
+          {/* Show Student ID or Employee ID based on role */}
+          {roleForm.role === 'student' && (
+            <Input
+              label="Student ID"
+              value={roleForm.studentId}
+              onChange={(e) => setRoleForm({ ...roleForm, studentId: e.target.value })}
+              placeholder="e.g. 22CS001"
+            />
+          )}
+          {roleForm.role === 'faculty' && (
+            <Input
+              label="Employee ID"
+              value={roleForm.employeeId}
+              onChange={(e) => setRoleForm({ ...roleForm, employeeId: e.target.value })}
+              placeholder="e.g. 2024FAC023"
+            />
+          )}
+
           <div className="flex justify-end pt-1">
-            <Button loading={savingRole} onClick={handleSetRole}><Shield size={15} /> Update Role</Button>
+            <Button loading={savingRole} onClick={handleSetRole}><Shield size={15} /> Update User</Button>
           </div>
         </div>
       )}

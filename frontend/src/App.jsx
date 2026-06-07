@@ -15,6 +15,13 @@ import AttendanceStudentPage from './pages/attendance/AttendanceStudentPage';
 import AttendanceFacultyPage from './pages/attendance/AttendanceFacultyPage';
 import ProfilePage from './pages/settings/ProfilePage';
 import Spinner from './components/ui/Spinner';
+import HostelApplicationPage from './pages/hostel/HostelApplicationPage';
+import HostelAdminPage from './pages/hostel/HostelAdminPage';
+import StudentRegistrationPage from './pages/auth/StudentRegistrationPage';
+import EnrollmentAdminPage from './pages/enrollment/EnrollmentAdminPage';
+import NotFoundPage from './pages/NotFoundPage';
+
+import UserManagementPage from './pages/admin/UserManagementPage';
 
 function RequireAuth({ children, roles }) {
   const { user, loading } = useAuth();
@@ -48,9 +55,15 @@ function AppRoutes() {
         <Route path="enrollment/timetable" element={<RequireAuth roles={['student']}><TimetablePage /></RequireAuth>} />
         <Route path="attendance/my" element={<RequireAuth roles={['student']}><AttendanceStudentPage /></RequireAuth>} />
         <Route path="attendance/mark" element={<RequireAuth roles={['faculty']}><AttendanceFacultyPage /></RequireAuth>} />
+        <Route path="hostel" element={<RequireAuth roles={['student']}><HostelApplicationPage /></RequireAuth>} />
+        <Route path="hostel/admin" element={<RequireAuth roles={['admin']}><HostelAdminPage /></RequireAuth>} />
+
+        <Route path="enrollment/admin" element={<RequireAuth roles={['admin']}><EnrollmentAdminPage /></RequireAuth>} />
+        <Route path="users/manage" element={<RequireAuth roles={['admin']}><UserManagementPage /></RequireAuth>} />
+        <Route path="register-student" element={<RequireAuth roles={['student']}><StudentRegistrationPage /></RequireAuth>} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

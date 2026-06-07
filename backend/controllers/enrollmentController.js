@@ -60,8 +60,8 @@ export async function enrollInCourse(req, res, next) {
     }
 
     let enrollment = existingEnrollment;
-    if (enrollment?.status === "Dropped") {
-      enrollment.status = "Enrolled";
+    if (enrollment?.status === "Dropped" || enrollment?.status === "Rejected") {
+      enrollment.status = "Pending_Enroll";
       enrollment.droppedAt = null;
       enrollment.enrollmentDate = now;
       await enrollment.save();
@@ -69,12 +69,12 @@ export async function enrollInCourse(req, res, next) {
       enrollment = new Enrollment({
         studentId,
         courseOfferingId: offering._id,
+        status: "Pending_Enroll"
       });
       await enrollment.save();
     }
 
-    offering.enrolledCount += 1;
-    await offering.save();
+    // Do NOT increment offering.enrolledCount yet. That happens on admin approval.
 
     const populated = await Enrollment.findById(enrollment._id).populate({
       path: "courseOfferingId",
@@ -118,17 +118,15 @@ export async function dropCourse(req, res, next) {
       studentId,
       courseOfferingId: offering._id,
     });
-    if (!enrollment || enrollment.status === "Dropped") {
+    if (!enrollment || enrollment.status === "Dropped" || enrollment.status === "Pending_Drop") {
       return res
         .status(400)
-        .json({ message: "Student is not enrolled in this course offering" });
+        .json({ message: "Student is not enrolled or drop is already pending" });
     }
-    enrollment.status = "Dropped";
-    enrollment.droppedAt = new Date();
+    enrollment.status = "Pending_Drop";
     await enrollment.save();
 
-    offering.enrolledCount = Math.max(0, Number(offering.enrolledCount || 0) - 1);
-    await offering.save();
+    // Do NOT decrement offering.enrolledCount yet. That happens on admin approval.
 
     return res.status(200).json({ message: "Course dropped successfully" });
   } catch (err) {
@@ -145,10 +143,12 @@ export async function getEnrollments(req, res, next) {
     const filter = { studentId };
     const status = req.query.status;
     if (status) {
-      if (!["Enrolled", "Dropped"].includes(status)) {
+      const statuses = status.split(',');
+      const allowed = ["Pending_Enroll", "Enrolled", "Pending_Drop", "Dropped", "Rejected"];
+      if (!statuses.every(s => allowed.includes(s))) {
         return res.status(400).json({ message: "Invalid status filter" });
       }
-      filter.status = status;
+      filter.status = { $in: statuses };
     }
 
     const semester = req.query.semester;
@@ -307,6 +307,121 @@ export async function getStudentTimetable(req, res, next) {
     });
   }
   catch (err) {
+    return next(err);
+  }
+}
+
+export async function getAdminRequests(req, res, next) {
+  try {
+    let statusFilter = { $in: ["Pending_Enroll", "Pending_Drop"] };
+    if (req.query.status) {
+      statusFilter = { $in: req.query.status.split(',') };
+    }
+    const requests = await Enrollment.find({ status: statusFilter })
+      .populate("studentId", "name email studentId")
+      .populate({
+        path: "courseOfferingId",
+        populate: [
+          { path: "courseId", model: "Course", select: "courseCode courseTitle credits" },
+          { path: "facultyId", model: "User", select: "name" },
+        ],
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Fetch timetable for each student to check for clashes if it's an enroll request
+    const studentIds = [...new Set(requests.map((r) => String(r.studentId?._id)).filter(Boolean))];
+    const enrolledCourses = await Enrollment.find({
+      studentId: { $in: studentIds },
+      status: "Enrolled",
+    }).populate("courseOfferingId").lean();
+
+    const result = requests.map((reqRow) => {
+      let hasClash = false;
+      const conflicts = [];
+      const offering = reqRow.courseOfferingId;
+      if (reqRow.status === "Pending_Enroll" && offering && offering.meetings && offering.meetings.length > 0) {
+        const studentActive = enrolledCourses.filter(
+          (e) => String(e.studentId) === String(reqRow.studentId._id) && String(e.courseOfferingId._id) !== String(offering._id)
+        );
+
+        for (const meeting of offering.meetings) {
+          const mStart = timeToMinutes(meeting.startTime);
+          const mEnd = timeToMinutes(meeting.endTime);
+          for (const active of studentActive) {
+            const actOffering = active.courseOfferingId;
+            if (actOffering && actOffering.meetings) {
+              for (const actMeeting of actOffering.meetings) {
+                if (actMeeting.day === meeting.day) {
+                  const aStart = timeToMinutes(actMeeting.startTime);
+                  const aEnd = timeToMinutes(actMeeting.endTime);
+                  // Check overlap
+                  if (mStart < aEnd && aStart < mEnd) {
+                    hasClash = true;
+                    conflicts.push({
+                      day: meeting.day,
+                      time: `${meeting.startTime}-${meeting.endTime}`,
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      return { ...reqRow, hasClash, conflicts };
+    });
+
+    return res.status(200).json({ count: result.length, requests: result });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function updateRequestStatus(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { action } = req.body; // "approve" or "reject"
+
+    const enrollment = await Enrollment.findById(id).populate("courseOfferingId");
+    if (!enrollment) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    if (!["Pending_Enroll", "Pending_Drop"].includes(enrollment.status)) {
+      return res.status(400).json({ message: `Request is not pending (current status: ${enrollment.status})` });
+    }
+
+    const offering = enrollment.courseOfferingId;
+
+    if (action === "approve") {
+      if (enrollment.status === "Pending_Enroll") {
+        enrollment.status = "Enrolled";
+        if (offering) {
+          offering.enrolledCount += 1;
+          await offering.save();
+        }
+      } else if (enrollment.status === "Pending_Drop") {
+        enrollment.status = "Dropped";
+        enrollment.droppedAt = new Date();
+        if (offering) {
+          offering.enrolledCount = Math.max(0, Number(offering.enrolledCount || 0) - 1);
+          await offering.save();
+        }
+      }
+    } else if (action === "reject") {
+      if (enrollment.status === "Pending_Enroll") {
+        enrollment.status = "Rejected";
+      } else if (enrollment.status === "Pending_Drop") {
+        enrollment.status = "Enrolled"; // Cancel the drop request
+      }
+    } else {
+      return res.status(400).json({ message: "Invalid action. Use 'approve' or 'reject'." });
+    }
+
+    await enrollment.save();
+    return res.status(200).json({ message: `Request ${action}d successfully`, enrollment });
+  } catch (err) {
     return next(err);
   }
 }

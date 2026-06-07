@@ -3,7 +3,9 @@ import {
   enrollInCourse,
   dropCourse,
   getEnrollments,
-  getStudentTimetable
+  getStudentTimetable,
+  getAdminRequests,
+  updateRequestStatus
 } from "../controllers/enrollmentController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import authRoles from "../middleware/authRoles.js";
@@ -14,4 +16,9 @@ router.post("/enroll/:id", authMiddleware, authRoles("student"), enrollInCourse)
 router.delete("/drop/:id", authMiddleware, authRoles("student"), dropCourse);
 router.get("/", authMiddleware, authRoles("student"), getEnrollments);
 router.get("/timetable", authMiddleware, authRoles("student"), getStudentTimetable);
+
+// Admin Routes
+router.get("/requests", authMiddleware, authRoles("admin"), getAdminRequests);
+router.patch("/requests/:id", authMiddleware, authRoles("admin"), updateRequestStatus);
+
 export default router;
