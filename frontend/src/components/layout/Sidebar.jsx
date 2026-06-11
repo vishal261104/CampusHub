@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BookOpen, GraduationCap, CalendarCheck, ClipboardList,
-  Settings, LogOut, ChevronRight, BookMarked, ClipboardCheck, Home, Users
+  Settings, LogOut, ChevronRight, BookMarked, ClipboardCheck, Home, Users, BedDouble, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ProfileCard from '../ui/ProfileCard';
@@ -15,6 +15,7 @@ const navConfig = {
     { label: 'My Timetable', to: '/enrollment/timetable', icon: CalendarCheck },
     { label: 'My Attendance', to: '/attendance/my', icon: ClipboardList },
     { label: 'Hostel', to: '/hostel', icon: Home },
+    { label: 'My Complaints', to: '/hostel/complaints', icon: MessageSquare },
   ],
   faculty: [
     { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
@@ -29,7 +30,12 @@ const navConfig = {
     { label: 'Course Offerings', to: '/courses/offerings', icon: BookMarked },
     { label: 'Course Catalog', to: '/courses/catalog', icon: GraduationCap },
     { label: 'Enrollment Requests', to: '/enrollment/admin', icon: ClipboardList },
+  ],
+  hostelAdmin: [
+    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
     { label: 'Hostel Applications', to: '/hostel/admin', icon: Home },
+    { label: 'Manage Rooms', to: '/hostel/rooms', icon: BedDouble },
+    { label: 'Complaints', to: '/hostel/complaints/admin', icon: MessageSquare },
   ],
 };
 
@@ -44,7 +50,7 @@ export default function Sidebar({ onClose }) {
     navigate('/login');
   };
 
-  const roleColors = { admin: 'bg-violet-500', faculty: 'bg-emerald-500', student: 'bg-sky-500' };
+  const roleColors = { admin: 'bg-violet-500', faculty: 'bg-emerald-500', student: 'bg-sky-500', hostelAdmin: 'bg-amber-500' };
 
   return (
     <div className="flex flex-col h-full bg-white border-r border-slate-200 w-64 flex-shrink-0 relative z-10">

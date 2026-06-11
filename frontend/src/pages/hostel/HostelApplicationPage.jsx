@@ -9,6 +9,7 @@ export default function HostelApplicationPage() {
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [allocation, setAllocation] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -25,8 +26,10 @@ export default function HostelApplicationPage() {
       // Cancelled and Rejected → show form so student can reapply
       if (app && (app.status === 'Pending' || app.status === 'Approved')) {
         setApplication(app);
+        if (res.data.allocation) setAllocation(res.data.allocation);
       } else {
         setApplication(null);
+        setAllocation(null);
       }
     } catch (err) {
       if (err.response?.status !== 404) {
@@ -115,7 +118,7 @@ export default function HostelApplicationPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Hostel Block</p>
-                <p className="font-medium text-slate-800">{application.hostel} Hostel</p>
+                <p className="font-medium text-slate-800">{application.hostel}</p>
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Room Category</p>
@@ -123,15 +126,11 @@ export default function HostelApplicationPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Pref. Room No</p>
-                <p className="font-medium text-slate-800">{application.roomNumber}</p>
+                <p className="font-medium text-slate-800">{application.roomNumber || 'Auto-assign'}</p>
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Applied On</p>
                 <p className="font-medium text-slate-800">{new Date(application.appliedAt).toLocaleDateString()}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Year of Study</p>
-                <p className="font-medium text-slate-800">{application.year} Year</p>
               </div>
             </div>
 
@@ -154,9 +153,18 @@ export default function HostelApplicationPage() {
             {application.status === 'Approved' && (
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
                 <CheckCircle2 className="text-emerald-500 mt-0.5 flex-shrink-0" size={18} />
-                <div>
+                <div className="flex-1">
                   <h4 className="text-sm font-semibold text-emerald-800">Application Approved!</h4>
-                  <p className="text-sm text-emerald-700 mt-1">Your hostel accommodation has been approved. Room allocation details will be available in the dashboard soon.</p>
+                  {allocation?.roomId ? (
+                    <div className="mt-2 bg-white border border-emerald-100 rounded-lg p-3">
+                      <p className="text-sm font-semibold text-slate-800">Allocated Room: #{allocation.roomId.roomNumber}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {allocation.roomId.hostelBlock} · {allocation.roomId.hostelType} Hostel · Floor {allocation.roomId.floor} · {allocation.roomId.roomType}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-emerald-700 mt-1">Your hostel accommodation has been approved. Room allocation details will appear here.</p>
+                  )}
                 </div>
               </div>
             )}
@@ -201,16 +209,16 @@ export default function HostelApplicationPage() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-slate-700">Preferred Room Number</label>
+                <label className="text-sm font-semibold text-slate-700">Preferred Room Number <span className="text-slate-400 font-normal">(optional)</span></label>
                 <input 
                   type="text" 
                   name="roomNumber" 
-                  required 
-                  placeholder="e.g. A101"
+                  placeholder="e.g. A101 — leave blank for auto-assign"
                   value={formData.roomNumber} 
                   onChange={handleInputChange}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary-100 focus:border-primary-400 outline-none transition-all"
                 />
+                <p className="text-xs text-slate-400">If left empty, a room matching your category will be auto-assigned when approved.</p>
               </div>
             </div>
 

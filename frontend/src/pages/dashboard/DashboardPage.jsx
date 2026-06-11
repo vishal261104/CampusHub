@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, GraduationCap, ClipboardList, TrendingUp, Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { BookOpen, GraduationCap, ClipboardList, TrendingUp, Calendar, Clock, CheckCircle, AlertCircle, Home, BedDouble, FileCheck, FileX } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getEnrollments } from '../../api/enrollments';
 import { getMyAttendance } from '../../api/attendance';
@@ -303,9 +303,92 @@ function AdminDashboard() {
   );
 }
 
+function HostelAdminDashboard() {
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    import('../../api/hostel').then(({ getAllHostelApplications }) => {
+      getAllHostelApplications({})
+        .then((res) => setApplications(res.data.applications || []))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    });
+  }, []);
+
+  const pending = applications.filter((a) => a.status === 'Pending').length;
+  const approved = applications.filter((a) => a.status === 'Approved').length;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-amber-50 rounded-lg flex items-center justify-center">
+            <Home size={20} className="text-amber-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 leading-tight">Hostel Admin Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Manage hostel applications and rooms</p>
+          </div>
+        </div>
+        <hr className="mt-4 mb-6 border-slate-100" />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="Total Applications" value={applications.length} sub="All time" icon={Home} color="indigo" loading={loading} />
+        <StatCard label="Pending Review" value={pending} sub="Awaiting action" icon={ClipboardList} color="amber" loading={loading} />
+        <StatCard label="Approved" value={approved} sub="Currently housed" icon={CheckCircle} color="emerald" loading={loading} />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a href="/hostel/admin" className="card p-6 hover:shadow-md transition-shadow flex items-center gap-4 group">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-100 transition-colors">
+            <FileCheck size={22} className="text-amber-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-slate-800">Review Applications</p>
+            <p className="text-sm text-slate-500 mt-0.5">
+              {loading ? '...' : `${pending} application${pending !== 1 ? 's' : ''} pending`}
+            </p>
+          </div>
+        </a>
+        <a href="/hostel/rooms" className="card p-6 hover:shadow-md transition-shadow flex items-center gap-4 group">
+          <div className="w-12 h-12 rounded-2xl bg-primary-50 flex items-center justify-center flex-shrink-0 group-hover:bg-primary-100 transition-colors">
+            <BedDouble size={22} className="text-primary-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-slate-800">Manage Rooms</p>
+            <p className="text-sm text-slate-500 mt-0.5">Create, update, and view room occupancy</p>
+          </div>
+        </a>
+      </div>
+
+      {applications.filter((a) => a.status === 'Pending').length > 0 && (
+        <div className="card">
+          <div className="px-6 pt-5 pb-3 border-b border-slate-100">
+            <h3 className="text-sm font-semibold text-slate-800">Recent Pending Applications</h3>
+          </div>
+          <div className="divide-y divide-slate-50">
+            {applications.filter((a) => a.status === 'Pending').slice(0, 5).map((app) => (
+              <div key={app._id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/80 transition-colors">
+                <div>
+                  <p className="text-sm font-medium text-slate-800">{app.studentId?.name || '—'}</p>
+                  <p className="text-xs text-slate-400">{app.hostel} · Room {app.roomNumber} · {app.roomCategory}</p>
+                </div>
+                <span className="text-xs font-mono text-slate-400">{app.hostelApplicationNumber}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   if (user?.role === 'student') return <StudentDashboard />;
   if (user?.role === 'faculty') return <FacultyDashboard />;
+  if (user?.role === 'hostelAdmin') return <HostelAdminDashboard />;
   return <AdminDashboard />;
 }

@@ -40,8 +40,8 @@ export default function HostelAdminPage() {
   const handleAction = async (id, status) => {
     setActing(id);
     try {
-      await updateHostelApplicationStatus(id, { status });
-      toast.success(`Application ${status.toLowerCase()} successfully`);
+      const res = await updateHostelApplicationStatus(id, { status });
+      toast.success(res.data?.message || `Application ${status.toLowerCase()} successfully`);
       fetchApplications(activeTab);
     } catch (err) {
       toast.error(err.response?.data?.message || `Failed to ${status.toLowerCase()} application`);
@@ -148,7 +148,7 @@ export default function HostelAdminPage() {
                       <span className="ml-1 text-xs text-slate-400">({app.gender})</span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-slate-700">{app.roomNumber}</p>
+                      <p className="text-slate-700">{app.roomNumber || <span className="text-xs text-slate-400 italic">Auto-assign</span>}</p>
                       <p className="text-xs text-slate-400">{app.roomCategory}</p>
                     </td>
                     <td className="px-6 py-4 text-slate-600">{app.year}</td>

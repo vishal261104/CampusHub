@@ -17,6 +17,9 @@ import ProfilePage from './pages/settings/ProfilePage';
 import Spinner from './components/ui/Spinner';
 import HostelApplicationPage from './pages/hostel/HostelApplicationPage';
 import HostelAdminPage from './pages/hostel/HostelAdminPage';
+import HostelRoomsPage from './pages/hostel/HostelRoomsPage';
+import StudentComplaintsPage from './pages/hostel/StudentComplaintsPage';
+import AdminComplaintsPage from './pages/hostel/AdminComplaintsPage';
 import StudentRegistrationPage from './pages/auth/StudentRegistrationPage';
 import EnrollmentAdminPage from './pages/enrollment/EnrollmentAdminPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -56,7 +59,10 @@ function AppRoutes() {
         <Route path="attendance/my" element={<RequireAuth roles={['student']}><AttendanceStudentPage /></RequireAuth>} />
         <Route path="attendance/mark" element={<RequireAuth roles={['faculty']}><AttendanceFacultyPage /></RequireAuth>} />
         <Route path="hostel" element={<RequireAuth roles={['student']}><HostelApplicationPage /></RequireAuth>} />
-        <Route path="hostel/admin" element={<RequireAuth roles={['admin']}><HostelAdminPage /></RequireAuth>} />
+        <Route path="hostel/complaints" element={<RequireAuth roles={['student']}><StudentComplaintsPage /></RequireAuth>} />
+        <Route path="hostel/admin" element={<RequireAuth roles={['hostelAdmin']}><HostelAdminPage /></RequireAuth>} />
+        <Route path="hostel/rooms" element={<RequireAuth roles={['hostelAdmin']}><HostelRoomsPage /></RequireAuth>} />
+        <Route path="hostel/complaints/admin" element={<RequireAuth roles={['hostelAdmin']}><AdminComplaintsPage /></RequireAuth>} />
 
         <Route path="enrollment/admin" element={<RequireAuth roles={['admin']}><EnrollmentAdminPage /></RequireAuth>} />
         <Route path="users/manage" element={<RequireAuth roles={['admin']}><UserManagementPage /></RequireAuth>} />

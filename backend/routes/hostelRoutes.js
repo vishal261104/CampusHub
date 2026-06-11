@@ -8,13 +8,13 @@ import {
 
 const router = express.Router();
 
-// Student routes — attachUser ensures we get gender/studentId from DB
+// ─── Student routes — attachUser ensures we get gender/studentId from DB ─────
 router.post('/', authMiddleware, authRoles('student'), attachUser, applyForHostel);
 router.get('/me', authMiddleware, authRoles('student'), attachUser, getMyApplication);
 router.put('/:id', authMiddleware, authRoles('student'), attachUser, cancelApplication);
 
-// Admin routes
-router.get('/', authMiddleware, authRoles('admin'), getAllApplications);
-router.patch('/:id', authMiddleware, authRoles('admin'), updateApplicationStatus);
+// ─── hostelAdmin: Application management ────────────────────────────
+router.get('/', authMiddleware, authRoles('hostelAdmin'), getAllApplications);
+router.patch('/:id', authMiddleware, authRoles('hostelAdmin'), updateApplicationStatus);
 
 export default router;

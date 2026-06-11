@@ -1,16 +1,88 @@
 import HostelApplication from "../models/HostelApplication.js";
+import * as roomService from "../services/hostelRoomService.js";
+import * as allocationService from "../services/roomAllocationService.js";
 
-// ─── STUDENT: Submit a hostel application ────────────────────────────────────
+// Handles HTTP request to create a new hostel room.
+export const createRoom = async (req, res, next) => {
+  try {
+    const room = await roomService.createRoom(req.body);
+    return res.status(201).json({ message: "Room created successfully", room });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
+    next(err);
+  }
+};
+
+// Handles HTTP request to retrieve all active rooms based on query filters.
+export const getAllRooms = async (req, res, next) => {
+  try {
+    const rooms = await roomService.getAllRooms(req.query);
+    return res.status(200).json({ count: rooms.length, rooms });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Handles HTTP request to retrieve details of a single hostel room by ID.
+export const getRoomById = async (req, res, next) => {
+  try {
+    const room = await roomService.getRoomById(req.params.id);
+    return res.status(200).json({ room });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
+    next(err);
+  }
+};
+
+// Handles HTTP request to update an existing hostel room.
+export const updateRoom = async (req, res, next) => {
+  try {
+    const room = await roomService.updateRoom(req.params.id, req.body);
+    return res.status(200).json({ message: "Room updated successfully", room });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
+    next(err);
+  }
+};
+
+// Handles HTTP request to soft-delete a hostel room.
+export const deleteRoom = async (req, res, next) => {
+  try {
+    await roomService.deleteRoom(req.params.id);
+    return res.status(200).json({ message: "Room deactivated successfully" });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
+    next(err);
+  }
+};
+
+// Handles HTTP request to view currently allocated occupants of a room.
+export const getRoomOccupancy = async (req, res, next) => {
+  try {
+    const room = await roomService.getRoomById(req.params.id);
+    const allocations = await allocationService.getRoomAllocations(room._id);
+    return res.status(200).json({
+      room,
+      currentOccupancy: room.currentOccupancy,
+      capacity: room.capacity,
+      occupants: allocations,
+    });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
+    next(err);
+  }
+};
+
+// Handles HTTP request for a student to submit a new hostel application.
+// roomNumber is optional — if omitted, a room will be auto-assigned on approval.
 export const applyForHostel = async (req, res, next) => {
   try {
-    const userDoc = req.userDoc; // from attachUser middleware
+    const userDoc = req.userDoc;
 
-    // 1. Must have a studentId (completed student registration)
     if (!userDoc.studentId) {
       return res.status(400).json({ message: 'Please complete your student registration first to get a Student ID' });
     }
 
-    // 2. Gender and hostel come from verified DB data — not from body
     const gender = userDoc.gender;
     if (!gender) {
       return res.status(400).json({ message: 'Gender is not set on your profile. Please contact admin.' });
@@ -19,12 +91,10 @@ export const applyForHostel = async (req, res, next) => {
 
     const { roomCategory, roomNumber } = req.body;
 
-    // 3. Validate required body fields
-    if (!roomCategory || !roomNumber) {
-      return res.status(400).json({ message: 'All fields are required: roomCategory, roomNumber' });
+    if (!roomCategory) {
+      return res.status(400).json({ message: 'Room category is required' });
     }
 
-    // 3b. Calculate academic year from studentId (e.g., '24CS001' -> admission year 2024)
     const admissionYearStr = userDoc.studentId.substring(0, 2);
     const admissionYear = 2000 + parseInt(admissionYearStr, 10);
     const currentYear = new Date().getFullYear();
@@ -35,7 +105,6 @@ export const applyForHostel = async (req, res, next) => {
     else if (yearDiff === 2) year = '3rd';
     else if (yearDiff >= 3) year = '4th';
 
-    // 4. Block duplicate active applications (Pending or Approved)
     const existing = await HostelApplication.findOne({
       studentId: userDoc._id,
       status: { $in: ['Pending', 'Approved'] },
@@ -47,16 +116,14 @@ export const applyForHostel = async (req, res, next) => {
       });
     }
 
-    // 5. Generate unique application number
     const hostelApplicationNumber = `HA-${Date.now()}-${userDoc.studentId}`;
 
-    // 6. Create the application
     const application = await HostelApplication.create({
       studentId: userDoc._id,
       gender,
       hostel,
       roomCategory,
-      roomNumber,
+      roomNumber: roomNumber || '',
       year,
       hostelApplicationNumber,
     });
@@ -67,7 +134,7 @@ export const applyForHostel = async (req, res, next) => {
   }
 };
 
-// ─── STUDENT: View own latest application ────────────────────────────────────
+// Handles HTTP request for a student to view their own latest application.
 export const getMyApplication = async (req, res, next) => {
   try {
     const application = await HostelApplication.findOne({ studentId: req.userDoc._id })
@@ -77,13 +144,19 @@ export const getMyApplication = async (req, res, next) => {
       return res.status(404).json({ message: 'No application found' });
     }
 
-    return res.status(200).json({ application });
+    // If approved, attach allocation info
+    let allocation = null;
+    if (application.status === 'Approved') {
+      allocation = await allocationService.getStudentAllocation(req.userDoc._id);
+    }
+
+    return res.status(200).json({ application, allocation });
   } catch (err) {
     next(err);
   }
 };
 
-// ─── STUDENT: Cancel own application (only if Pending) ───────────────────────
+// Handles HTTP request for a student to cancel their pending hostel application.
 export const cancelApplication = async (req, res, next) => {
   try {
     const applicationId = req.params.id;
@@ -93,7 +166,6 @@ export const cancelApplication = async (req, res, next) => {
       return res.status(404).json({ message: 'Application not found' });
     }
 
-    // Ownership check
     if (application.studentId.toString() !== req.userDoc._id.toString()) {
       return res.status(403).json({ message: 'You are not authorized to cancel this application' });
     }
@@ -113,7 +185,7 @@ export const cancelApplication = async (req, res, next) => {
   }
 };
 
-// ─── ADMIN: Get all applications (with optional status filter) ────────────────
+// Handles HTTP request for admins to list all hostel applications, optionally filtered by status.
 export const getAllApplications = async (req, res, next) => {
   try {
     const { status } = req.query;
@@ -137,7 +209,9 @@ export const getAllApplications = async (req, res, next) => {
   }
 };
 
-// ─── ADMIN: Approve or Reject an application ─────────────────────────────────
+// Handles HTTP request for admins to approve or reject a pending hostel application.
+// On approval: allocates a room (preferred or auto-assigned) and increments occupancy.
+// On rejection: simply updates the status.
 export const updateApplicationStatus = async (req, res, next) => {
   try {
     const applicationId = req.params.id;
@@ -159,11 +233,36 @@ export const updateApplicationStatus = async (req, res, next) => {
       });
     }
 
-    application.status = status;
+    if (status === 'Approved') {
+      // Allocate room — throws if no room available or student already allocated
+      const { allocation, room } = await allocationService.allocateRoom({
+        studentId: application.studentId,
+        applicationId: application._id,
+        hostelType: application.hostel,
+        roomCategory: application.roomCategory,
+        preferredRoomNumber: application.roomNumber || null,
+      });
+
+      application.status = 'Approved';
+      // Store the actually allocated room number on the application for reference
+      application.roomNumber = room.roomNumber;
+      await application.save();
+
+      return res.status(200).json({
+        message: `Application approved. Room ${room.roomNumber} (${room.hostelBlock}) allocated.`,
+        application,
+        allocation,
+        room,
+      });
+    }
+
+    // Rejection
+    application.status = 'Rejected';
     await application.save();
 
-    return res.status(200).json({ message: `Application ${status.toLowerCase()} successfully`, application });
+    return res.status(200).json({ message: 'Application rejected successfully', application });
   } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
     next(err);
   }
 };

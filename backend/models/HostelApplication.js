@@ -23,7 +23,7 @@ const hostelApplicationSchema = new mongoose.Schema({
     },
     roomNumber: {
         type: String,
-        required: true
+        default: '',
     },
     year: {
         type: String,

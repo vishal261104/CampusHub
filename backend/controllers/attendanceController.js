@@ -1,131 +1,44 @@
-import CourseOffering from "../models/CourseOffering.js";
-import Attendance from "../models/Attendance.js";
-import Enrollment from "../models/Enrollment.js";
+import * as attendanceService from "../services/attendanceService.js";
 
-
+// Handles HTTP request to retrieve enrolled students for a course offering.
 export async function getEnrolledStudents(req, res, next) {
   try {
-    const { courseOfferingId } = req.params;
-    const offering = await CourseOffering.findById(courseOfferingId).select("_id");
-    if (!offering) {
-      return res.status(404).json({ message: "Course Offering not found" });
-    }
-
-    const enrollments = await Enrollment.find({
-      courseOfferingId: offering._id,
-      status: "Enrolled",
-    })
-      .populate("studentId", "name email")
-      .lean();
-
-    const students = enrollments
-      .map((enrollment) => enrollment.studentId)
-      .filter(Boolean);
-
+    const students = await attendanceService.getEnrolledStudents(req.params.courseOfferingId);
     return res.status(200).json({ students });
   } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
     return next(err);
   }
 }
 
+// Handles HTTP request to mark attendance for a student.
 export async function markAttendance(req, res, next) {
   try {
-    const facultyId = req.user.id;
-    const { courseOfferingId, studentId, status, date } = req.body;
-    const offering = await CourseOffering.findById(courseOfferingId);
-    if (!offering)
-      return res.status(404).json({ message: "Course Offering not found" });
-    if (offering.facultyId.toString() !== facultyId)
-      return res
-        .status(403)
-        .json({ message: "Faculty not authorized to take attendance" });
-    const enrollment = await Enrollment.findOne({
-      studentId,
-      courseOfferingId,
-    });
-    if(!enrollment || enrollment.status === "Dropped")
-      return res.status(400).json({ message: "Student is not enrolled in this course" });
-    const existingAttendance = await Attendance.findOne({
-      courseOfferingId,
-      studentId,
-      date,
-    });
-    if (existingAttendance)
-      return res
-        .status(400)
-        .json({ message: "Attendance already marked for this date" });
-    const attendance = await Attendance.create({
-      courseOfferingId,
-      studentId,
-      status,
-      date,
-    });
+    const attendance = await attendanceService.markAttendance(req.user.id, req.body);
     return res.status(201).json({ attendance });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
+    return next(err);
+  }
+}
+
+// Handles HTTP request to retrieve the logged-in student's attendance summary.
+export async function getAttendance(req, res, next) {
+  try {
+    const result = await attendanceService.getAttendance(req.user.id);
+    return res.status(200).json(result);
   } catch (err) {
     return next(err);
   }
 }
 
-
-export async function getAttendance(req, res, next) {
-
-   try {
-
-      const studentId = req.user.id;
-
-      const records = await Attendance.find({ studentId })
-         .populate("courseOfferingId");
-
-      const attendanceMap = {};
-
-      for(const record of records) {
-
-         const offeringId = record.courseOfferingId._id.toString();
-
-         if(!attendanceMap[offeringId]) {
-
-            attendanceMap[offeringId] = {
-               courseOffering: record.courseOfferingId,
-               totalClasses: 0,
-               presentClasses: 0
-            };
-         }
-
-         attendanceMap[offeringId].totalClasses++;
-
-         if(record.status === "Present") {
-            attendanceMap[offeringId].presentClasses++;
-         }
-      }
-
-      const result = Object.values(attendanceMap).map(item => ({
-         ...item,
-         percentage:
-            (item.presentClasses / item.totalClasses) * 100
-      }));
-
-      return res.status(200).json(result);
-
-   } catch(err) {
-     return next(err);
-   }
-}
-
-export async function getCourseAttendance(req, res, next) {//Faculty can view attendance records for their course offerings
-    try {
-        const facultyId = req.user.id;
-        const { courseOfferingId } = req.params;
-        const offering = await CourseOffering.findById(courseOfferingId);
-        if (!offering)
-            return res.status(404).json({ message: "Course Offering not found" });
-        if (offering.facultyId.toString() !== facultyId)
-            return res
-                .status(403)
-                .json({ message: "Faculty not authorized to view attendance" });
-        const attendanceRecords = await Attendance.find({ courseOfferingId }).populate("studentId", "name rollNumber");
-        return res.status(200).json({ attendance: attendanceRecords });
-    }
-    catch (err) {
-      return next(err);
-    }
+// Handles HTTP request to retrieve attendance records for a course offering (faculty only).
+export async function getCourseAttendance(req, res, next) {
+  try {
+    const records = await attendanceService.getCourseAttendance(req.user.id, req.params.courseOfferingId);
+    return res.status(200).json({ attendance: records });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
+    return next(err);
+  }
 }
