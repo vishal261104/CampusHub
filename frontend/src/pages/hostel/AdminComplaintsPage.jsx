@@ -12,6 +12,10 @@ const STATUSES    = ['Open', 'In Progress', 'Resolved'];
 const CATEGORIES  = ['Electrical', 'Plumbing', 'WiFi', 'Furniture', 'Sanitation', 'Other'];
 const PRIORITIES  = ['Low', 'Medium', 'High', 'Critical'];
 
+// hostelAdmin can only move complaints to Open or In Progress.
+// Only students can mark a complaint as Resolved (from student dashboard).
+const ADMIN_STATUSES = ['Open', 'In Progress'];
+
 const statusVariant = { 'Open': 'danger', 'In Progress': 'warning', 'Resolved': 'success' };
 const priorityColor = {
   Low:      'text-slate-500  bg-slate-50  border-slate-200',
@@ -217,9 +221,9 @@ export default function AdminComplaintsPage() {
                   <div className="px-5 pb-5 border-t border-slate-100 space-y-4">
                     <p className="text-sm text-slate-600 mt-4 leading-relaxed">{c.description}</p>
 
-                    {/* Status actions */}
+                    {/* Status actions — admin cannot mark Resolved; only students can */}
                     {c.status !== 'Resolved' && (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 items-center">
                         {c.status === 'Open' && (
                           <button
                             disabled={isActing}
@@ -230,14 +234,11 @@ export default function AdminComplaintsPage() {
                             Mark In Progress
                           </button>
                         )}
-                        <button
-                          disabled={isActing}
-                          onClick={() => handleStatus(c._id, 'Resolved')}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-colors disabled:opacity-50"
-                        >
-                          {isActing ? <Spinner size="xs" /> : <CheckCircle2 size={12} />}
-                          Mark Resolved
-                        </button>
+                        {c.status === 'In Progress' && (
+                          <span className="text-[11px] text-slate-400 italic">
+                            Awaiting student confirmation to resolve
+                          </span>
+                        )}
                       </div>
                     )}
 

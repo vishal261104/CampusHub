@@ -13,17 +13,16 @@ import {
 
 const router = express.Router();
 
-// ─── Student routes ────────────────────────────────────────────────────────────
+// ─── Student routes ─────────────────────────────────────────────────────────────────
 // roomId is derived from active RoomAllocation in service — never trusted from body
 router.post("/", authMiddleware, authRoles("student"), attachUser, createComplaint);
 router.get("/my", authMiddleware, authRoles("student"), attachUser, getMyComplaints);
+// Student marks their own complaint as Resolved (service enforces ownership + In Progress guard)
+router.patch("/:id/status", authMiddleware, authRoles("student", "hostelAdmin"), attachUser, updateComplaintStatus);
 router.post("/:id/comments", authMiddleware, authRoles("student", "hostelAdmin"), attachUser, addComment);
 
-// ─── hostelAdmin routes ────────────────────────────────────────────────────────
+// ─── hostelAdmin routes ─────────────────────────────────────────────────────────────────
 router.get("/", authMiddleware, authRoles("hostelAdmin"), getAllComplaints);
-router.patch("/:id/status", authMiddleware, authRoles("hostelAdmin"), updateComplaintStatus);
-router.patch("/:id/assign", authMiddleware, authRoles("hostelAdmin"), assignComplaint);
-// Admin can also add comments
-router.post("/:id/comments", authMiddleware, authRoles("student", "hostelAdmin"), attachUser, addComment);
+router.patch("/:id/assign", authMiddleware, authRoles("hostelAdmin"), attachUser, assignComplaint);
 
 export default router;

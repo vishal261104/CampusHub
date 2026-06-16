@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getMyComplaints, createComplaint, addComplaintComment } from '../../api/hostel';
+import { getMyComplaints, createComplaint, addComplaintComment, updateComplaintStatus } from '../../api/hostel';
 import Spinner from '../../components/ui/Spinner';
 import Badge from '../../components/ui/Badge';
 import toast from 'react-hot-toast';
@@ -34,6 +34,7 @@ export default function StudentComplaintsPage() {
   const [expanded, setExpanded]     = useState(null);  // complaint _id
   const [commentText, setCommentText] = useState('');
   const [commenting, setCommenting]   = useState(false);
+  const [resolving, setResolving]     = useState(null); // complaint _id being resolved
 
   const fetchComplaints = async () => {
     setLoading(true);
@@ -78,6 +79,19 @@ export default function StudentComplaintsPage() {
       toast.error(err.response?.data?.message || 'Failed to add comment');
     } finally {
       setCommenting(false);
+    }
+  };
+
+  const handleResolve = async (complaintId) => {
+    setResolving(complaintId);
+    try {
+      const res = await updateComplaintStatus(complaintId, { status: 'Resolved' });
+      setComplaints(prev => prev.map(c => c._id === complaintId ? res.data.complaint : c));
+      toast.success('Complaint marked as Resolved — thank you!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to resolve complaint');
+    } finally {
+      setResolving(null);
     }
   };
 
@@ -182,6 +196,21 @@ export default function StudentComplaintsPage() {
                     {c.assignedTo && (
                       <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2">
                         <span className="font-semibold">Assigned to:</span> {c.assignedTo}
+                      </div>
+                    )}
+
+                    {/* Student can mark In Progress complaints as Resolved */}
+                    {c.status === 'In Progress' && (
+                      <div className="mt-3">
+                        <button
+                          onClick={() => handleResolve(c._id)}
+                          disabled={resolving === c._id}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                        >
+                          {resolving === c._id ? <Spinner size="xs" /> : <CheckCircle2 size={14} />}
+                          Issue Resolved — Mark as Done
+                        </button>
+                        <p className="text-[11px] text-slate-400 mt-1.5">Only mark resolved if the issue has been fixed to your satisfaction.</p>
                       </div>
                     )}
 

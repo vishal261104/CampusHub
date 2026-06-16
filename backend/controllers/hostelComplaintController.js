@@ -33,11 +33,14 @@ export const getAllComplaints = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for hostelAdmin to update the status of a complaint.
+// Handles HTTP request to update a complaint's status.
+// hostelAdmin can set Open/In Progress; students can mark their own as Resolved.
 export const updateComplaintStatus = async (req, res, next) => {
     try {
         const { status } = req.body;
-        const complaint = await complaintService.updateComplaintStatus(req.params.id, status);
+        const callerRole = req.user.role;
+        const callerId   = req.userDoc._id;
+        const complaint = await complaintService.updateComplaintStatus(req.params.id, status, callerRole, callerId);
         return res.status(200).json({ message: `Complaint marked as ${status}`, complaint });
     } catch (err) {
         if (err.status) return res.status(err.status).json({ message: err.message });

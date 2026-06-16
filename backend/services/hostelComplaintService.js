@@ -44,13 +44,21 @@ export async function getAllComplaints(query = {}) {
         .sort({ createdAt: -1 });
 }
 
-// Updates the status of a complaint. Sets resolvedAt when status is Resolved.
-// A Resolved complaint cannot be moved back.
-export async function updateComplaintStatus(complaintId, status) {
-    const allowed = ["Open", "In Progress", "Resolved"];
-    if (!allowed.includes(status)) {
-        const err = new Error(`Invalid status. Must be one of: ${allowed.join(", ")}`);
-        err.status = 400;
+// Updates the status of a complaint with role-based rules:
+// - hostelAdmin can set: Open → In Progress (never Resolved).
+// - student can set: In Progress → Resolved (own complaints only).
+export async function updateComplaintStatus(complaintId, status, callerRole, callerId) {
+    const adminAllowed   = ["Open", "In Progress"];
+    const studentAllowed = ["Resolved"];
+
+    if (callerRole === "hostelAdmin" && !adminAllowed.includes(status)) {
+        const err = new Error("Hostel admin can only set status to: Open, In Progress");
+        err.status = 403;
+        throw err;
+    }
+    if (callerRole === "student" && !studentAllowed.includes(status)) {
+        const err = new Error("Students can only mark a complaint as Resolved");
+        err.status = 403;
         throw err;
     }
 
@@ -61,8 +69,22 @@ export async function updateComplaintStatus(complaintId, status) {
         throw err;
     }
 
+    // IDOR: students can only resolve their own complaints
+    if (callerRole === "student" && complaint.studentId.toString() !== callerId.toString()) {
+        const err = new Error("You can only resolve your own complaints");
+        err.status = 403;
+        throw err;
+    }
+
+    // Students can only resolve a complaint that is In Progress (admin has looked at it)
+    if (callerRole === "student" && complaint.status !== "In Progress") {
+        const err = new Error("You can only resolve a complaint that is In Progress");
+        err.status = 400;
+        throw err;
+    }
+
     if (complaint.status === "Resolved") {
-        const err = new Error("A resolved complaint cannot be reopened.");
+        const err = new Error("A resolved complaint cannot be changed.");
         err.status = 400;
         throw err;
     }
