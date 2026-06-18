@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Enrollment from "../models/Enrollment.js";
 import CourseOffering from "../models/CourseOffering.js";
+import SemesterConfig from "../models/SemesterConfig.js";
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const VALID_SEMESTERS = ["Spring", "Summer", "Fall", "Winter"];
@@ -37,6 +38,19 @@ export async function enrollInCourse(studentId, offeringId) {
   }
   if (offering.status !== "Open") {
     const err = new Error("Course offering is closed for enrollment");
+    err.status = 400;
+    throw err;
+  }
+
+  const activeSemester = await SemesterConfig.findOne({ isActive: true });
+  if (!activeSemester) {
+    const err = new Error("Enrollment is disabled: No active semester configured");
+    err.status = 400;
+    throw err;
+  }
+
+  if (offering.semester !== activeSemester.semester || offering.year !== activeSemester.year) {
+    const err = new Error(`Cannot enroll: This course is for ${offering.semester} ${offering.year}, but the active semester is ${activeSemester.semester} ${activeSemester.year}`);
     err.status = 400;
     throw err;
   }
@@ -145,8 +159,17 @@ export async function getEnrollments(studentId, query) {
     filter.status = { $in: statuses };
   }
 
-  const semester = query.semester;
-  const year = query.year;
+  let semester = query.semester;
+  let year = query.year;
+
+  if (!semester && year === undefined) {
+    const activeSemester = await SemesterConfig.findOne({ isActive: true });
+    if (activeSemester) {
+      semester = activeSemester.semester;
+      year = activeSemester.year;
+    }
+  }
+
   if (year !== undefined && (Number.isNaN(Number(year)) || Number(year) < 2000 || Number(year) > 2100)) {
     const err = new Error("Invalid year filter");
     err.status = 400;
@@ -186,8 +209,16 @@ export async function getStudentTimetable(studentId, query) {
     throw err;
   }
 
-  const semester = query.semester;
-  const year = query.year !== undefined ? Number(query.year) : undefined;
+  let semester = query.semester;
+  let year = query.year !== undefined ? Number(query.year) : undefined;
+
+  if (!semester && year === undefined) {
+    const activeSemester = await SemesterConfig.findOne({ isActive: true });
+    if (activeSemester) {
+      semester = activeSemester.semester;
+      year = activeSemester.year;
+    }
+  }
 
   if (semester && !VALID_SEMESTERS.includes(semester)) {
     const err = new Error("Invalid semester filter");

@@ -1,6 +1,7 @@
 import CourseOffering from "../models/CourseOffering.js";
 import User from "../models/User.js";
 import Course from "../models/Course.js";
+import SemesterConfig from "../models/SemesterConfig.js";
 
 // Safely parses a value into an integer, falling back to a default value if invalid.
 function toInt(value, fallback) {
@@ -269,21 +270,31 @@ export async function getOffering(offeringId) {
 
 // Retrieves a paginated list of offerings matching filters, optionally scoped to a faculty member.
 export async function listOfferings(query, userRole, userId) {
+  let { semester, year } = query;
+
+  if (!semester && year === undefined) {
+    const activeSemester = await SemesterConfig.findOne({ isActive: true });
+    if (activeSemester) {
+      semester = activeSemester.semester;
+      year = activeSemester.year;
+    }
+  }
+
   const page = Math.max(1, toInt(query.page, 1));
   const limit = Math.min(100, Math.max(1, toInt(query.limit, 20)));
   const skip = (page - 1) * limit;
 
   const filter = {};
-  if (query.semester) {
-    if (!["Spring", "Summer", "Fall", "Winter"].includes(query.semester)) {
+  if (semester) {
+    if (!["Spring", "Summer", "Fall", "Winter"].includes(semester)) {
       const err = new Error('Invalid semester');
       err.status = 400;
       throw err;
     }
-    filter.semester = query.semester;
+    filter.semester = semester;
   }
-  if (query.year) {
-    const y = Number(query.year);
+  if (year !== undefined) {
+    const y = Number(year);
     if (Number.isNaN(y) || y < 2000 || y > 2100) {
       const err = new Error('Invalid year');
       err.status = 400;
@@ -332,7 +343,15 @@ export async function listOfferings(query, userRole, userId) {
 
 // Retrieves course catalog (public-facing) with search, department filter, and pagination.
 export async function getCourseCatalog(query) {
-  const { semester, year, status, courseCode, search, department } = query;
+  let { semester, year, status, courseCode, search, department } = query;
+
+  if (!semester && year === undefined) {
+    const activeSemester = await SemesterConfig.findOne({ isActive: true });
+    if (activeSemester) {
+      semester = activeSemester.semester;
+      year = activeSemester.year;
+    }
+  }
 
   if (semester && !["Spring", "Summer", "Fall", "Winter"].includes(semester)) {
     const err = new Error("Invalid semester");

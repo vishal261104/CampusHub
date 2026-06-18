@@ -10,6 +10,7 @@ import hostelRoutes from './routes/hostelRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
 import complaintRoutes from './routes/complaintRoutes.js';
 import outingLeaveRoutes from './routes/outingLeaveRoutes.js';
+import feeRoutes from './routes/feeRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import 'dotenv/config';
 
@@ -78,6 +79,7 @@ app.use('/api/hostel', hostelRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/outing', outingLeaveRoutes);
+app.use('/api/fees', feeRoutes);
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
