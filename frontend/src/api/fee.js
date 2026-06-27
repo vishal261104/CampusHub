@@ -25,6 +25,6 @@ export const syncFeeRecords       = ()           => api.post('/fees/records/sync
 export const getMyFeeDashboard    = ()           => api.get('/fees/my-fees');
 
 // ─── Stripe Payment (Student) ─────────────────────────────────────────────────
-export const createPaymentIntent  = (data)       => api.post('/fees/payment/intent', data);
-export const confirmPayment       = (data)       => api.post('/fees/payment/confirm', data);
-export const getPaymentHistory    = (feeRecordId) => api.get(`/fees/payment/history/${feeRecordId}`);
+export const createPaymentIntent  = (data)       => api.post('/payments/intent', data);
+export const confirmPayment       = (data)       => api.post('/payments/confirm', data);
+export const getPaymentHistory    = (feeRecordId) => api.get(`/payments/history/${feeRecordId}`);

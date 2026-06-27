@@ -1,4 +1,4 @@
-import User from '../models/User.js';
+import User from '../modules/users/user.model.js';
 
 /**
  * Middleware: Fetches the full user document from the DB and attaches it to req.userDoc.

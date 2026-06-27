@@ -55,9 +55,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
   const [error, setError]               = useState('');
   const [loading, setLoading]           = useState(false);
 
-  // Use a ref (NOT state) for the stripe context — mutations don't trigger re-renders
-  // and therefore don't cause the useEffect cleanup/re-mount loop.
-  const stripeRef  = useRef(null);  // { stripe, elements, clientSecret }
+  const stripeRef  = useRef(null);  // { stripe, elements, clientSecret, paymentEl }
   const mountedRef = useRef(false);
 
   const pending = record.totalAmount - record.paidAmount;
@@ -67,8 +65,24 @@ function PaymentModal({ record, onClose, onSuccess }) {
     setAmount(String(Math.min(val, pending)));
   };
 
-  // ── Mount Stripe Payment Element whenever step switches to 'stripe'
-  // Only depends on [step] — stripeRef mutations are invisible to React.
+  // Helper to manually destroy the Stripe element
+  const destroyStripeElement = () => {
+    if (stripeRef.current?.paymentEl) {
+      try { stripeRef.current.paymentEl.unmount(); } catch (_) {}
+    }
+    stripeRef.current  = null;
+    mountedRef.current = false;
+    setElementReady(false);
+  };
+
+  // Clean up on component unmount (modal closed)
+  useEffect(() => {
+    return () => destroyStripeElement();
+  }, []);
+
+  // ── Mount Stripe Payment Element when step becomes 'stripe'
+  // NO cleanup function — we manually unmount in handleBack / component unmount.
+  // This prevents the element from being destroyed when step goes to 'processing'.
   useEffect(() => {
     if (step !== 'stripe') return;
     if (mountedRef.current) return;
@@ -87,15 +101,10 @@ function PaymentModal({ record, onClose, onSuccess }) {
     paymentEl.on('ready', () => setElementReady(true));
     paymentEl.mount('#stripe-payment-element');
 
-    // Store paymentEl directly on the ref object — no setState, no re-render
+    // Store on ref — no re-render
     stripeRef.current.paymentEl = paymentEl;
-
-    return () => {
-      try { paymentEl.unmount(); } catch (_) {}
-      mountedRef.current = false;
-      setElementReady(false);
-    };
-  }, [step]); // ← only step, not stripeRef
+    // No return cleanup! We manage unmounting manually.
+  }, [step]);
 
   // ── Step 1 → 2: create PaymentIntent, store in ref, switch step
   const handleProceed = async () => {
@@ -117,11 +126,10 @@ function PaymentModal({ record, onClose, onSuccess }) {
       const stripe   = await loadStripe(publishableKey);
       const elements = stripe.elements({ clientSecret });
 
-      // Write to ref (no state update → no re-render)
       stripeRef.current  = { stripe, elements, clientSecret };
       mountedRef.current = false;
       setElementReady(false);
-      setStep('stripe'); // ← this is the only state change; triggers useEffect
+      setStep('stripe');
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.error?.message || 'Failed to start payment';
       setError(msg);
@@ -130,12 +138,15 @@ function PaymentModal({ record, onClose, onSuccess }) {
     }
   };
 
-  // ── Step 2 → 3: confirm payment (only callable after elementReady)
+  // ── Step 2 → 3: confirm payment
+  // CRITICAL: capture stripe & elements BEFORE calling setStep, so they survive re-render.
   const handlePay = async () => {
     if (!stripeRef.current || !elementReady) return;
-    setStep('processing');
 
+    // Grab references before any state changes
     const { stripe, elements, clientSecret } = stripeRef.current;
+
+    setStep('processing');
 
     const { error: stripeErr } = await stripe.confirmPayment({
       elements,
@@ -160,14 +171,13 @@ function PaymentModal({ record, onClose, onSuccess }) {
     }
   };
 
-  // ── Go back to amount step — clean up Stripe element
+  // ── Go back to amount step — manually clean up Stripe element
   const handleBack = () => {
-    stripeRef.current  = null;
-    mountedRef.current = false;
-    setElementReady(false);
+    destroyStripeElement();
     setStep('amount');
     setError('');
   };
+
 
 
   return (
@@ -215,14 +225,6 @@ function PaymentModal({ record, onClose, onSuccess }) {
               >
                 Done
               </button>
-            </div>
-          )}
-
-          {/* ── Step: Processing ── */}
-          {step === 'processing' && (
-            <div className="text-center space-y-4 py-6">
-              <Spinner size="lg" />
-              <p className="text-sm text-slate-500">Processing your payment…</p>
             </div>
           )}
 
@@ -294,9 +296,20 @@ function PaymentModal({ record, onClose, onSuccess }) {
             </div>
           )}
 
+          {/* ── Step: Processing ── */}
+          {step === 'processing' && (
+            <div className="text-center space-y-4 py-6">
+              <Spinner size="lg" />
+              <p className="text-sm text-slate-500">Processing your payment…</p>
+            </div>
+          )}
+
           {/* ── Step: Stripe Payment Element ── */}
-          {step === 'stripe' && (
-            <div className="space-y-4">
+          {/* IMPORTANT: render during BOTH 'stripe' AND 'processing' so the element
+              stays mounted while stripe.confirmPayment() is in flight.
+              During 'processing' we just visually hide it. */}
+          {(step === 'stripe' || step === 'processing') && (
+            <div className={step === 'processing' ? 'hidden' : 'space-y-4'}>
               <div className="bg-slate-50 rounded-xl px-4 py-3 flex justify-between items-center">
                 <span className="text-sm text-slate-600">Paying</span>
                 <span className="text-base font-bold text-slate-900">{fmtINR(parseFloat(amount))}</span>

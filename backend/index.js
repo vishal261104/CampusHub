@@ -1,16 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import connectDB from './config/db.js';
-import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import courseRoutes from './routes/courseRoutes.js';
-import enrollmentRoutes from './routes/enrollmentRoutes.js';
-import attendanceRoutes from './routes/attendanceRoutes.js';
-import hostelRoutes from './routes/hostelRoutes.js';
-import roomRoutes from './routes/roomRoutes.js';
-import complaintRoutes from './routes/complaintRoutes.js';
-import outingLeaveRoutes from './routes/outingLeaveRoutes.js';
-import feeRoutes from './routes/feeRoutes.js';
+import authRoutes from './modules/auth/auth.routes.js';
+import userRoutes from './modules/users/user.routes.js';
+import courseRoutes from './modules/courses/course.routes.js';
+import enrollmentRoutes from './modules/enrollments/enrollment.routes.js';
+import attendanceRoutes from './modules/attendance/attendance.routes.js';
+import hostelRoutes from './modules/hostel/hostel.routes.js';
+import roomRoutes from './modules/hostel/room.routes.js';
+import complaintRoutes from './modules/hostel/complaint.routes.js';
+import outingLeaveRoutes from './modules/outing/outingLeave.routes.js';
+import feeRoutes from './modules/fees/fee.routes.js';
+import paymentRoutes from './modules/payments/payment.routes.js';
 import errorHandler from './middleware/errorHandler.js';
 import 'dotenv/config';
 
@@ -80,6 +81,7 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/outing', outingLeaveRoutes);
 app.use('/api/fees', feeRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
