@@ -66,4 +66,8 @@ userSchema.methods.comparePassword = async function comparePassword(candidatePas
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+// Fast lookup by role and department
+userSchema.index({ role: 1 });
+userSchema.index({ department: 1 });
+
 export default mongoose.model('User', userSchema);

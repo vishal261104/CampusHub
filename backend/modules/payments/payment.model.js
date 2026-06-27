@@ -50,10 +50,18 @@ const feePaymentSchema = new mongoose.Schema(
             type: String,
             default: null,
         },
+
+        // Auto-generated receipt number (set on payment success) — e.g. RCPT-2025-000042
+        receiptNumber: {
+            type: String,
+            default: null,
+            index: true,
+        },
     },
     { timestamps: true }
 );
 
 feePaymentSchema.index({ feeRecordId: 1 });
+feePaymentSchema.index({ status: 1 });
 
 export default mongoose.model("FeePayment", feePaymentSchema);

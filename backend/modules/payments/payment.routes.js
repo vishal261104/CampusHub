@@ -7,12 +7,14 @@ import {
     createPaymentIntent,
     confirmPayment,
     getPaymentHistory,
+    getReceipt,
 } from "./payment.controller.js";
 
 const router = express.Router();
 
-router.post("/intent", authMiddleware, authRoles("student"), attachUser, createPaymentIntent);
-router.post("/confirm", authMiddleware, authRoles("student"), attachUser, confirmPayment);
-router.get("/history/:feeRecordId", authMiddleware, authRoles("student"), attachUser, getPaymentHistory);
+router.post("/intent",                  authMiddleware, authRoles("student"), attachUser, createPaymentIntent);
+router.post("/confirm",                 authMiddleware, authRoles("student"), attachUser, confirmPayment);
+router.get("/history/:feeRecordId",     authMiddleware, authRoles("student"), attachUser, getPaymentHistory);
+router.get("/receipt/:paymentId",       authMiddleware, authRoles("student"), attachUser, getReceipt);
 
 export default router;

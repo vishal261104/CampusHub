@@ -29,4 +29,6 @@ const courseSchema = new mongoose.Schema(
     }
 );
 
+courseSchema.index({ department: 1 });
+
 export default mongoose.model("Course", courseSchema);

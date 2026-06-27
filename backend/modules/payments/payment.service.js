@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import StudentFeeRecord from "../fees/studentFeeRecord.model.js";
 import FeePayment from "./payment.model.js";
+import Counter from "../core/counter.model.js";
 
 // Validate key at startup so we get a clear error, not a cryptic 401
 const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -14,13 +15,12 @@ function assertStripeConfigured() {
         const err = new Error(
             'Online payments are not configured yet. Please ask the administrator to add Stripe API keys.'
         );
-        err.status = 503; // Service Unavailable — NOT 401, so axios won\'t log out
+        err.status = 503;
         throw err;
     }
 }
 
 function handleStripeError(stripeErr) {
-    // Map Stripe's own error types to safe HTTP codes that won\'t trigger frontend logout
     const status = stripeErr.type === 'StripeAuthenticationError' ? 503
                  : stripeErr.type === 'StripeCardError'           ? 402
                  : stripeErr.type === 'StripeInvalidRequestError' ? 400
@@ -34,8 +34,6 @@ function handleStripeError(stripeErr) {
 
 function validateAmount(amount, pendingAmount) {
     const amt = parseFloat(amount);
-    // Stripe requires a minimum of roughly $0.50 USD (which is ~₹42 INR)
-    // We enforce a minimum of ₹50 to be safe.
     if (isNaN(amt) || amt < 50) {
         const err = new Error("Payment amount must be at least ₹50");
         err.status = 400;
@@ -48,7 +46,17 @@ function validateAmount(amount, pendingAmount) {
         err.status = 400;
         throw err;
     }
-    return Math.round(amt); // whole rupees only
+    return Math.round(amt);
+}
+
+/**
+ * Generate a unique receipt number: RCPT-YYYY-NNNNNN
+ */
+async function generateReceiptNumber() {
+    const year = new Date().getFullYear();
+    const prefix = `RCPT-${year}`;
+    const seq = await Counter.getNext(prefix);
+    return `${prefix}-${String(seq).padStart(6, '0')}`;
 }
 
 // ─── SERVICE FUNCTIONS ────────────────────────────────────────────────────────
@@ -60,7 +68,6 @@ function validateAmount(amount, pendingAmount) {
 export async function createPaymentIntent(studentId, { feeRecordId, amount }) {
     assertStripeConfigured();
 
-    // Load the fee record and validate ownership
     const feeRecord = await StudentFeeRecord.findById(feeRecordId).populate("studentId", "name email");
     if (!feeRecord) {
         const err = new Error("Fee record not found");
@@ -81,7 +88,6 @@ export async function createPaymentIntent(studentId, { feeRecordId, amount }) {
     const pendingAmount = feeRecord.totalAmount - feeRecord.paidAmount;
     const validatedAmount = validateAmount(amount, pendingAmount);
 
-    // Stripe amounts are in smallest currency unit (paise for INR = amount * 100)
     let paymentIntent;
     try {
         paymentIntent = await stripe.paymentIntents.create({
@@ -101,7 +107,6 @@ export async function createPaymentIntent(studentId, { feeRecordId, amount }) {
         handleStripeError(stripeErr);
     }
 
-    // Create a pending FeePayment record for audit trail
     await FeePayment.create({
         studentId,
         feeRecordId,
@@ -124,6 +129,7 @@ export async function createPaymentIntent(studentId, { feeRecordId, amount }) {
  * Called after the student's browser confirms the payment.
  * Retrieves the PaymentIntent from Stripe, verifies it succeeded,
  * then increments paidAmount on the StudentFeeRecord.
+ * Also generates a receipt number and triggers a payment_success notification.
  */
 export async function confirmPayment(studentId, { paymentIntentId }) {
     assertStripeConfigured();
@@ -134,7 +140,6 @@ export async function confirmPayment(studentId, { paymentIntentId }) {
         throw err;
     }
 
-    // Retrieve from Stripe to verify status (never trust the client)
     let intent;
     try {
         intent = await stripe.paymentIntents.retrieve(paymentIntentId);
@@ -150,7 +155,6 @@ export async function confirmPayment(studentId, { paymentIntentId }) {
         throw err;
     }
 
-    // Find our local record
     const feePayment = await FeePayment.findOne({
         stripePaymentIntentId: paymentIntentId,
     });
@@ -171,10 +175,14 @@ export async function confirmPayment(studentId, { paymentIntentId }) {
         return { feePayment, feeRecord };
     }
 
+    // Generate receipt number
+    const receiptNumber = await generateReceiptNumber();
+
     // Update local FeePayment
     feePayment.status = "succeeded";
     feePayment.stripePaymentMethodId = intent.payment_method || null;
     feePayment.receiptUrl = intent.charges?.data?.[0]?.receipt_url || null;
+    feePayment.receiptNumber = receiptNumber;
     await feePayment.save();
 
     // Increment paidAmount on the fee record
@@ -190,8 +198,23 @@ export async function confirmPayment(studentId, { paymentIntentId }) {
         feeRecord.totalAmount,
         feeRecord.paidAmount + amountInRupees
     );
-    feeRecord.lastUpdatedBy = null; // paid by student directly
-    await feeRecord.save(); // pre-save hook recomputes status
+    feeRecord.lastUpdatedBy = null;
+    await feeRecord.save();
+
+    // Fire payment_success notification (non-blocking — don't let it crash the payment)
+    try {
+        const { createNotification } = await import("../notifications/notification.service.js");
+        const fmtINR = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
+        await createNotification(
+            studentId,
+            "payment_success",
+            "Payment Successful! 🎉",
+            `Your payment of ${fmtINR(amountInRupees)} for ${feeRecord.semester} ${feeRecord.year} was successful. Receipt: ${receiptNumber}`,
+            { feeRecordId: feeRecord._id, paymentId: feePayment._id, amount: amountInRupees, receiptNumber }
+        );
+    } catch (notifErr) {
+        console.warn("[payments] Failed to create notification:", notifErr.message);
+    }
 
     return { feePayment, feeRecord };
 }
@@ -200,7 +223,6 @@ export async function confirmPayment(studentId, { paymentIntentId }) {
  * Returns all payment transactions for a student's fee record (payment history).
  */
 export async function getPaymentHistory(studentId, feeRecordId) {
-    // Verify ownership
     const feeRecord = await StudentFeeRecord.findById(feeRecordId);
     if (!feeRecord) {
         const err = new Error("Fee record not found");
@@ -217,4 +239,31 @@ export async function getPaymentHistory(studentId, feeRecordId) {
         .sort({ createdAt: -1 });
 
     return payments;
+}
+
+/**
+ * Returns full receipt data for a single payment, populated with student info.
+ */
+export async function getReceipt(studentId, paymentId) {
+    const feePayment = await FeePayment.findById(paymentId)
+        .populate("studentId", "name email studentId")
+        .populate({ path: "feeRecordId", populate: { path: "feeBreakdown.feeStructureId" } });
+
+    if (!feePayment) {
+        const err = new Error("Receipt not found");
+        err.status = 404;
+        throw err;
+    }
+    if (String(feePayment.studentId._id) !== String(studentId)) {
+        const err = new Error("Not authorized");
+        err.status = 403;
+        throw err;
+    }
+    if (feePayment.status !== "succeeded") {
+        const err = new Error("Receipt only available for successful payments");
+        err.status = 400;
+        throw err;
+    }
+
+    return feePayment;
 }

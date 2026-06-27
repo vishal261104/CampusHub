@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { getMyFeeDashboard, createPaymentIntent, confirmPayment, getPaymentHistory } from '../../api/fee';
 import Spinner from '../../components/ui/Spinner';
 import toast from 'react-hot-toast';
 import {
   IndianRupee, CalendarDays, CheckCircle2, Clock, AlertTriangle,
-  BookOpen, Home, ClipboardList, Library, Wrench, CreditCard, History, X, ArrowRight
+  BookOpen, Home, ClipboardList, Library, Wrench, CreditCard, History, X, ArrowRight, FileText
 } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -358,6 +359,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
 function PaymentHistory({ feeRecordId, onClose }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -393,19 +395,41 @@ function PaymentHistory({ feeRecordId, onClose }) {
           ) : (
             <div className="divide-y divide-slate-100">
               {history.map((p, i) => (
-                <div key={i} className="flex items-center justify-between py-3.5">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">{fmtINR(p.amount)}</p>
-                    <p className="text-[11px] text-slate-400">{fmtDateTime(p.createdAt)}</p>
+                <div key={i} className="py-4 space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-slate-800">{fmtINR(p.amount)}</p>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+                          <CheckCircle2 size={9} /> Paid
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{fmtDateTime(p.createdAt)}</p>
+                      {p.receiptNumber && (
+                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">{p.receiptNumber}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => { onClose(); navigate(`/fees/receipt/${p._id}`); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors"
+                    >
+                      <FileText size={11} /> Download Receipt
+                    </button>
                     {p.receiptUrl && (
-                      <a href={p.receiptUrl} target="_blank" rel="noreferrer" className="text-[11px] text-sky-600 hover:underline">
-                        View Receipt
+                      <a
+                        href={p.receiptUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1 text-[11px] text-sky-600 hover:underline font-semibold"
+                      >
+                        Stripe Receipt ↗
                       </a>
                     )}
                   </div>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
-                    <CheckCircle2 size={9} /> Paid
-                  </span>
                 </div>
               ))}
             </div>

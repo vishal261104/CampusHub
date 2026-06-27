@@ -28,3 +28,4 @@ export const getMyFeeDashboard    = ()           => api.get('/fees/my-fees');
 export const createPaymentIntent  = (data)       => api.post('/payments/intent', data);
 export const confirmPayment       = (data)       => api.post('/payments/confirm', data);
 export const getPaymentHistory    = (feeRecordId) => api.get(`/payments/history/${feeRecordId}`);
+export const getReceipt           = (paymentId)  => api.get(`/payments/receipt/${paymentId}`);

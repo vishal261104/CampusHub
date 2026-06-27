@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, GraduationCap, Check, X, Filter, ChevronDown } from 'lucide-react';
+import { Search, GraduationCap, Check, X, Filter, ChevronDown, AlertCircle } from 'lucide-react';
 import { getCourseCatalog } from '../../api/offerings';
 import { enrollInCourse, dropCourse, getEnrollments } from '../../api/enrollments';
+import { getMyFeeDashboard } from '../../api/fee';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
@@ -12,6 +13,8 @@ const SEMESTERS = ['Spring', 'Summer', 'Fall', 'Winter'];
 export default function EnrollPage() {
   const [offerings, setOfferings] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
+  const [feeRecord, setFeeRecord] = useState(null);       // student's fee record for active semester
+  const [activeSemester, setActiveSemester] = useState(null); // active semester from server
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [semester, setSemester] = useState('Fall');
@@ -21,12 +24,16 @@ export default function EnrollPage() {
   const fetchOfferings = async () => {
     setLoading(true);
     try {
-      const [offerRes, enrRes] = await Promise.all([
+      const [offerRes, enrRes, feeRes] = await Promise.all([
         getCourseCatalog({ semester, year }),
         getEnrollments({ status: 'Enrolled,Pending_Enroll,Pending_Drop' }),
+        getMyFeeDashboard(),
       ]);
       setOfferings(offerRes.data.offerings || []);
       setEnrollments(enrRes.data.enrollments || []);
+      // Dashboard returns { record, activeSemester } — a single record for the active semester
+      setFeeRecord(feeRes.data.record || null);
+      setActiveSemester(feeRes.data.activeSemester || null);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to load courses');
     } finally { setLoading(false); }
@@ -67,12 +74,33 @@ export default function EnrollPage() {
     return !q || course?.courseCode?.toLowerCase().includes(q) || course?.courseTitle?.toLowerCase().includes(q) || course?.department?.toLowerCase().includes(q);
   });
 
+  // Check if the selected semester matches the ACTIVE semester and if fees are paid.
+  // Only enforce fee constraint when the student is trying to enroll in the active semester.
+  const isActiveSemesterSelected =
+    activeSemester &&
+    activeSemester.semester === semester &&
+    activeSemester.year === year;
+  const isFeePaid = !isActiveSemesterSelected || (feeRecord && feeRecord.status === 'Paid');
+
   return (
     <div className="space-y-5">
       <div>
         <h2 className="text-xl font-bold text-slate-900">Enroll in Courses</h2>
         <p className="text-slate-500 text-sm">Browse available offerings and manage your enrollment</p>
       </div>
+
+      {!isFeePaid && isActiveSemesterSelected && feeRecord && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex gap-3 items-start">
+          <AlertCircle className="text-rose-600 mt-0.5 flex-shrink-0" size={18} />
+          <div>
+            <h3 className="text-sm font-semibold text-rose-800">Fee Payment Required</h3>
+            <p className="text-xs text-rose-600 mt-0.5">
+              You must pay the total fee for the {semester} {year} semester before you can enroll in courses.
+              Please visit the My Fees dashboard to complete your payment.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
@@ -162,7 +190,7 @@ export default function EnrollPage() {
                       Processing...
                     </Button>
                   ) : (
-                    <Button size="sm" className="flex-1" disabled={isClosed || isFull || isProcessing} loading={isProcessing} onClick={() => handleEnroll(o._id)}>
+                    <Button size="sm" className="flex-1" disabled={isClosed || isFull || isProcessing || !isFeePaid} loading={isProcessing} onClick={() => handleEnroll(o._id)}>
                       <Check size={13} /> {isFull ? 'Full' : 'Request Enroll'}
                     </Button>
                   )}

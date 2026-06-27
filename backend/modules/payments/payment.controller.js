@@ -1,7 +1,6 @@
 import * as stripeService from "./payment.service.js";
 
-// POST /api/fees/payment/intent
-// Student creates a Stripe PaymentIntent (initiates payment session)
+// POST /api/payments/intent
 export const createPaymentIntent = async (req, res, next) => {
     try {
         const result = await stripeService.createPaymentIntent(
@@ -15,8 +14,7 @@ export const createPaymentIntent = async (req, res, next) => {
     }
 };
 
-// POST /api/fees/payment/confirm
-// Student confirms a completed payment (backend re-verifies with Stripe)
+// POST /api/payments/confirm
 export const confirmPayment = async (req, res, next) => {
     try {
         const { feePayment, feeRecord } = await stripeService.confirmPayment(
@@ -34,8 +32,7 @@ export const confirmPayment = async (req, res, next) => {
     }
 };
 
-// GET /api/fees/payment/history/:feeRecordId
-// Student views their payment history for a specific fee record
+// GET /api/payments/history/:feeRecordId
 export const getPaymentHistory = async (req, res, next) => {
     try {
         const payments = await stripeService.getPaymentHistory(
@@ -43,6 +40,20 @@ export const getPaymentHistory = async (req, res, next) => {
             req.params.feeRecordId
         );
         return res.status(200).json({ count: payments.length, payments });
+    } catch (err) {
+        if (err.status) return res.status(err.status).json({ message: err.message });
+        next(err);
+    }
+};
+
+// GET /api/payments/receipt/:paymentId
+export const getReceipt = async (req, res, next) => {
+    try {
+        const payment = await stripeService.getReceipt(
+            req.userDoc._id,
+            req.params.paymentId
+        );
+        return res.status(200).json({ payment });
     } catch (err) {
         if (err.status) return res.status(err.status).json({ message: err.message });
         next(err);

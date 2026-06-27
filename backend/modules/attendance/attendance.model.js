@@ -27,4 +27,7 @@ const attendanceSchema = new mongoose.Schema(
 );
 
 attendanceSchema.index({studentId: 1, courseOfferingId: 1, date: 1}, {unique: true});
+// Fast lookup of attendance for a specific class meeting
+attendanceSchema.index({courseOfferingId: 1, date: 1});
+
 export default mongoose.model("Attendance", attendanceSchema);

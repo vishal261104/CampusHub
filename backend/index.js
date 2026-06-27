@@ -12,6 +12,7 @@ import complaintRoutes from './modules/hostel/complaint.routes.js';
 import outingLeaveRoutes from './modules/outing/outingLeave.routes.js';
 import feeRoutes from './modules/fees/fee.routes.js';
 import paymentRoutes from './modules/payments/payment.routes.js';
+import notificationRoutes from './modules/notifications/notification.routes.js';
 import errorHandler from './middleware/errorHandler.js';
 import 'dotenv/config';
 
@@ -82,6 +83,7 @@ app.use('/api/complaints', complaintRoutes);
 app.use('/api/outing', outingLeaveRoutes);
 app.use('/api/fees', feeRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
@@ -95,6 +97,15 @@ connectDB()
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
       console.log('Server link: http://localhost:' + PORT);
+    });
+
+    // ─── Hourly due-fee notification scanner ───────────────────────────────────
+    // Runs immediately on boot, then every hour.
+    import('./modules/notifications/notification.service.js').then(({ scanDueFeeNotifications }) => {
+      scanDueFeeNotifications().catch(err => console.warn('[cron] due-fee scan failed:', err.message));
+      setInterval(() => {
+        scanDueFeeNotifications().catch(err => console.warn('[cron] due-fee scan failed:', err.message));
+      }, 60 * 60 * 1000); // every hour
     });
   })
   .catch((err) => {

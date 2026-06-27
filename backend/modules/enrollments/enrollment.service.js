@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Enrollment from "./enrollment.model.js";
 import CourseOffering from "../courses/courseOffering.model.js";
 import SemesterConfig from "../core/semesterConfig.model.js";
+import StudentFeeRecord from "../fees/studentFeeRecord.model.js";
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const VALID_SEMESTERS = ["Spring", "Summer", "Fall", "Winter"];
@@ -54,6 +55,20 @@ export async function enrollInCourse(studentId, offeringId) {
     err.status = 400;
     throw err;
   }
+
+  // ─── Fee Constraint Check ───
+  const feeRecord = await StudentFeeRecord.findOne({
+    studentId,
+    semester: activeSemester.semester,
+    year: activeSemester.year,
+  });
+
+  if (!feeRecord || feeRecord.status !== "Paid") {
+    const err = new Error(`Cannot enroll: You must pay the total fee for the ${activeSemester.semester} ${activeSemester.year} semester first.`);
+    err.status = 403;
+    throw err;
+  }
+  // ────────────────────────────
 
   const now = new Date();
   if (now < offering.enrollStarts || now > offering.enrollEnds) {

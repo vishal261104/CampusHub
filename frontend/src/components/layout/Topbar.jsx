@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
+import NotificationBell from '../ui/NotificationBell';
 
 export default function Topbar({ onMenuClick, title }) {
   const { user, signOut } = useAuth();
@@ -48,6 +49,7 @@ export default function Topbar({ onMenuClick, title }) {
       </div>
 
       <div className="flex items-center gap-2 relative" ref={dropdownRef}>
+        <NotificationBell />
         <button
           onClick={() => setOpen((prev) => !prev)}
           className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-50 transition-colors focus:outline-none"

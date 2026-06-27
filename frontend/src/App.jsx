@@ -29,6 +29,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import FeeStructurePage from './pages/fees/FeeStructurePage';
 import StudentFeeDashboard from './pages/fees/StudentFeeDashboard';
+import ReceiptPage from './pages/fees/ReceiptPage';
 
 function RequireAuth({ children, roles }) {
   const { user, loading } = useAuth();
@@ -73,6 +74,7 @@ function AppRoutes() {
         <Route path="enrollment/admin" element={<RequireAuth roles={['admin']}><EnrollmentAdminPage /></RequireAuth>} />
         <Route path="fees/manage" element={<RequireAuth roles={['admin']}><FeeStructurePage /></RequireAuth>} />
         <Route path="fees/my-fees" element={<RequireAuth roles={['student']}><StudentFeeDashboard /></RequireAuth>} />
+        <Route path="fees/receipt/:paymentId" element={<RequireAuth roles={['student']}><ReceiptPage /></RequireAuth>} />
         <Route path="users/manage" element={<RequireAuth roles={['admin']}><UserManagementPage /></RequireAuth>} />
         <Route path="register-student" element={<RequireAuth roles={['student']}><StudentRegistrationPage /></RequireAuth>} />
         <Route path="profile" element={<ProfilePage />} />
