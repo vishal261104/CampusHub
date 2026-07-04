@@ -60,7 +60,7 @@ export default function ReceiptPage() {
   return (
     <>
       {/* Action Bar — hidden during print */}
-      <div className="print:hidden sticky top-0 z-20 bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
+      <div className="print:hidden mb-6 bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between shadow-sm">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors"
@@ -76,7 +76,7 @@ export default function ReceiptPage() {
       </div>
 
       {/* Receipt Content */}
-      <div className="min-h-screen bg-slate-100 py-10 px-4 print:bg-white print:py-0 print:px-0">
+      <div className="pb-10 print:py-0 print:px-0">
         <div
           id="receipt"
           className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden print:shadow-none print:rounded-none print:max-w-full"

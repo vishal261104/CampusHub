@@ -51,9 +51,6 @@ export default function NotificationBell() {
   const panelRef = useRef(null);
   const intervalRef = useRef(null);
 
-  // Only show for students
-  if (user?.role !== 'student') return null;
-
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await getMyNotifications();
@@ -65,11 +62,12 @@ export default function NotificationBell() {
   }, []);
 
   useEffect(() => {
+    if (user?.role !== 'student') return;
     fetchNotifications();
     // Poll every 60 seconds for new notifications
     intervalRef.current = setInterval(fetchNotifications, 60_000);
     return () => clearInterval(intervalRef.current);
-  }, [fetchNotifications]);
+  }, [fetchNotifications, user?.role]);
 
   // Close on outside click
   useEffect(() => {
@@ -81,6 +79,9 @@ export default function NotificationBell() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Only render bell UI for students — but hooks must always run above this
+  if (user?.role !== 'student') return null;
 
   const handleMarkAllRead = async () => {
     try {
