@@ -25,13 +25,13 @@ export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all'); // <-- filter state
+  const [roleFilter, setRoleFilter] = useState('all'); 
 
-  // Modal state
+  
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Form state
+  
   const [formRole, setFormRole] = useState('student');
   const [joinYear, setJoinYear] = useState(new Date().getFullYear().toString());
   const [department, setDepartment] = useState('CSE');
@@ -93,7 +93,7 @@ export default function UserManagementPage() {
     }
   };
 
-  // Apply search + role filter
+  
   const filteredUsers = users.filter(u => {
     const matchesSearch =
       u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -108,7 +108,7 @@ export default function UserManagementPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {}
       <div>
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary-50 rounded-lg flex items-center justify-center">
@@ -122,9 +122,9 @@ export default function UserManagementPage() {
         <hr className="mt-4 mb-6 border-slate-100" />
       </div>
 
-      {/* Search & Role Filter */}
+      {}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        {/* Search */}
+        {}
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -136,7 +136,7 @@ export default function UserManagementPage() {
           />
         </div>
 
-        {/* Role filter dropdown */}
+        {}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
             Filter by role
@@ -155,7 +155,7 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      {/* Stats row */}
+      {}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {ALL_ROLES.map(role => {
           const count = users.filter(u => u.role === role).length;
@@ -174,7 +174,7 @@ export default function UserManagementPage() {
         })}
       </div>
 
-      {/* User Table */}
+      {}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -239,7 +239,7 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      {/* Assignment Modal */}
+      {}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-fade-in">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-scale-in">
@@ -269,7 +269,7 @@ export default function UserManagementPage() {
                 </select>
               </div>
 
-              {/* Faculty-specific fields */}
+              {}
               {formRole === 'faculty' && (
                 <div className="p-4 bg-primary-50/50 rounded-xl space-y-4 border border-primary-100/50 mt-4">
                   <h4 className="text-sm font-semibold text-primary-900 flex items-center gap-2">
@@ -304,7 +304,7 @@ export default function UserManagementPage() {
                 </div>
               )}
 
-              {/* Student-specific fields */}
+              {}
               {formRole === 'student' && (
                 <div className="space-y-1.5 mt-4">
                   <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Student ID (Optional)</label>
@@ -318,7 +318,7 @@ export default function UserManagementPage() {
                 </div>
               )}
 
-              {/* Hostel Admin info banner */}
+              {}
               {formRole === 'hostelAdmin' && (
                 <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 mt-4">
                   <h4 className="text-sm font-semibold text-amber-900 flex items-center gap-2">

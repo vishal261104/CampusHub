@@ -45,11 +45,11 @@ const hostelApplicationSchema = new mongoose.Schema({
     }
 });
 
-// Unique application reference number
+
 hostelApplicationSchema.index({ hostelApplicationNumber: 1 }, { unique: true });
-// Fast lookup of a student's applications
+
 hostelApplicationSchema.index({ studentId: 1 });
-// Admin filtering by status
+
 hostelApplicationSchema.index({ status: 1 });
 
 const HostelApplication = mongoose.model('HostelApplication', hostelApplicationSchema);

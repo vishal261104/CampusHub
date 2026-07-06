@@ -1,8 +1,11 @@
 import * as outingLeaveService from "./outingLeave.service.js";
 
-// ─── SETTINGS ─────────────────────────────────────────────────────────────────
 
-// Handles HTTP request to retrieve the current hostel settings (late return threshold).
+
+
+/**
+ * Retrieves the global settings for outing/leave (e.g. late return thresholds).
+ */
 export const getSettings = async (req, res, next) => {
     try {
         const settings = await outingLeaveService.getSettings();
@@ -12,7 +15,10 @@ export const getSettings = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for hostelAdmin to update the late return threshold.
+
+/**
+ * Updates the late return threshold (hour and minute) used for evaluating late check-ins.
+ */
 export const updateThreshold = async (req, res, next) => {
     try {
         const settings = await outingLeaveService.updateLateThreshold(req.user.id, req.body);
@@ -23,9 +29,12 @@ export const updateThreshold = async (req, res, next) => {
     }
 };
 
-// ─── OUTINGS ──────────────────────────────────────────────────────────────────
 
-// Handles HTTP request for a student to create a new same-day outing.
+
+
+/**
+ * Creates a new outing record for a student, provided they have an active room allocation.
+ */
 export const createOuting = async (req, res, next) => {
     try {
         const outing = await outingLeaveService.createOuting(req.userDoc._id, req.body);
@@ -36,7 +45,10 @@ export const createOuting = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for a student to mark their return (check-in).
+
+/**
+ * Checks a student back in from an active outing and marks if they are late.
+ */
 export const checkIn = async (req, res, next) => {
     try {
         const outing = await outingLeaveService.checkIn(req.userDoc._id);
@@ -48,7 +60,10 @@ export const checkIn = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for a student to view their outing history.
+
+/**
+ * Retrieves the history of outings for the currently logged-in student.
+ */
 export const getMyOutings = async (req, res, next) => {
     try {
         const outings = await outingLeaveService.getMyOutings(req.userDoc._id);
@@ -58,7 +73,10 @@ export const getMyOutings = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for hostelAdmin to see currently active outings (students outside).
+
+/**
+ * Retrieves all currently active (not yet checked-in) outings across the hostel.
+ */
 export const getActiveOutings = async (req, res, next) => {
     try {
         const outings = await outingLeaveService.getActiveOutings();
@@ -68,7 +86,10 @@ export const getActiveOutings = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for hostelAdmin to list all outings with optional filters.
+
+/**
+ * Retrieves all outing records with pagination and optional status filters (admin use).
+ */
 export const getAllOutings = async (req, res, next) => {
     try {
         const result = await outingLeaveService.getAllOutings(req.query);
@@ -78,9 +99,12 @@ export const getAllOutings = async (req, res, next) => {
     }
 };
 
-// ─── LEAVE REQUESTS ───────────────────────────────────────────────────────────
 
-// Handles HTTP request for a student to submit an overnight leave request.
+
+
+/**
+ * Submits a new leave request for a student extending over multiple days.
+ */
 export const createLeaveRequest = async (req, res, next) => {
     try {
         const leave = await outingLeaveService.createLeaveRequest(req.userDoc._id, req.body);
@@ -91,7 +115,10 @@ export const createLeaveRequest = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for a student to view their leave request history.
+
+/**
+ * Retrieves the history of leave requests for the currently logged-in student.
+ */
 export const getMyLeaveRequests = async (req, res, next) => {
     try {
         const requests = await outingLeaveService.getMyLeaveRequests(req.userDoc._id);
@@ -101,7 +128,10 @@ export const getMyLeaveRequests = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for hostelAdmin to list all leave requests with optional status filter.
+
+/**
+ * Retrieves all leave requests with pagination and optional status filters (admin use).
+ */
 export const getAllLeaveRequests = async (req, res, next) => {
     try {
         const result = await outingLeaveService.getAllLeaveRequests(req.query);
@@ -112,7 +142,10 @@ export const getAllLeaveRequests = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for hostelAdmin to approve or reject a leave request.
+
+/**
+ * Reviews (approves or rejects) a pending leave request.
+ */
 export const reviewLeaveRequest = async (req, res, next) => {
     try {
         const { action, reviewNote } = req.body;

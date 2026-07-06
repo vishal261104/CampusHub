@@ -93,9 +93,9 @@ const offeringSchema = new mongoose.Schema(
 );
 
 offeringSchema.index({ courseId: 1, semester: 1, year: 1, section: 1 }, { unique: true });
-// Fast lookup of offerings for a specific semester
+
 offeringSchema.index({ semester: 1, year: 1, status: 1 });
-// Fast lookup of offerings taught by a specific faculty
+
 offeringSchema.index({ facultyId: 1 });
 
 export default mongoose.model("CourseOffering", offeringSchema);

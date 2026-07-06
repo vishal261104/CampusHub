@@ -31,10 +31,10 @@ export default function StudentComplaintsPage() {
   const [showForm, setShowForm]     = useState(false);
   const [form, setForm]             = useState(INITIAL_FORM);
   const [saving, setSaving]         = useState(false);
-  const [expanded, setExpanded]     = useState(null);  // complaint _id
+  const [expanded, setExpanded]     = useState(null);  
   const [commentText, setCommentText] = useState('');
   const [commenting, setCommenting]   = useState(false);
-  const [resolving, setResolving]     = useState(null); // complaint _id being resolved
+  const [resolving, setResolving]     = useState(null); 
 
   const fetchComplaints = async () => {
     setLoading(true);
@@ -103,7 +103,7 @@ export default function StudentComplaintsPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
@@ -122,7 +122,7 @@ export default function StudentComplaintsPage() {
         </button>
       </div>
 
-      {/* Stats row */}
+      {}
       {complaints.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           {[
@@ -138,7 +138,7 @@ export default function StudentComplaintsPage() {
         </div>
       )}
 
-      {/* Complaints list */}
+      {}
       {loading ? (
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       ) : complaints.length === 0 ? (
@@ -156,7 +156,7 @@ export default function StudentComplaintsPage() {
             const isOpen = expanded === c._id;
             return (
               <div key={c._id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                {/* Card header */}
+                {}
                 <button
                   onClick={() => toggleExpand(c._id)}
                   className="w-full text-left px-5 py-4 flex items-start gap-3 hover:bg-slate-50 transition-colors"
@@ -188,7 +188,7 @@ export default function StudentComplaintsPage() {
                   {isOpen ? <ChevronUp size={16} className="text-slate-400 mt-1 flex-shrink-0" /> : <ChevronDown size={16} className="text-slate-400 mt-1 flex-shrink-0" />}
                 </button>
 
-                {/* Expanded detail */}
+                {}
                 {isOpen && (
                   <div className="px-5 pb-5 border-t border-slate-100">
                     <p className="text-sm text-slate-600 mt-4 leading-relaxed">{c.description}</p>
@@ -199,7 +199,7 @@ export default function StudentComplaintsPage() {
                       </div>
                     )}
 
-                    {/* Student can mark In Progress complaints as Resolved */}
+                    {}
                     {c.status === 'In Progress' && (
                       <div className="mt-3">
                         <button
@@ -221,7 +221,7 @@ export default function StudentComplaintsPage() {
                       </div>
                     )}
 
-                    {/* Comments thread */}
+                    {}
                     {c.comments?.length > 0 && (
                       <div className="mt-4 space-y-2">
                         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Comments</p>
@@ -245,7 +245,7 @@ export default function StudentComplaintsPage() {
                       </div>
                     )}
 
-                    {/* Add comment — only if not resolved */}
+                    {}
                     {c.status !== 'Resolved' && (
                       <div className="mt-4 flex gap-2">
                         <input
@@ -273,7 +273,7 @@ export default function StudentComplaintsPage() {
         </div>
       )}
 
-      {/* New Complaint Modal */}
+      {}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setShowForm(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 animate-slide-up" onClick={e => e.stopPropagation()}>

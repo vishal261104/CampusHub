@@ -1,8 +1,11 @@
 import * as feeService from "./fee.service.js";
 
-// ─── ADMIN: Fee Structure CRUD ────────────────────────────────────────────────
-
-// GET /api/fees — list all fee structures (filters via query params)
+/**
+ * Controller to fetch all fee structures (base fees).
+ * Supports filtering by year, semester, category, and active status.
+ * Route: GET /api/fees/
+ * Access: Admin
+ */
 export const getAllFeeStructures = async (req, res, next) => {
     try {
         const fees = await feeService.getAllFeeStructures(req.query);
@@ -12,7 +15,11 @@ export const getAllFeeStructures = async (req, res, next) => {
     }
 };
 
-// GET /api/fees/years — distinct year list for dropdown
+/**
+ * Controller to fetch a distinct list of academic years currently used in fee structures.
+ * Route: GET /api/fees/years
+ * Access: Admin
+ */
 export const getAcademicYears = async (req, res, next) => {
     try {
         const years = await feeService.getDistinctYears();
@@ -22,7 +29,11 @@ export const getAcademicYears = async (req, res, next) => {
     }
 };
 
-// GET /api/fees/:id — single fee structure
+/**
+ * Controller to fetch details of a specific fee structure by ID.
+ * Route: GET /api/fees/:id
+ * Access: Admin
+ */
 export const getFeeStructureById = async (req, res, next) => {
     try {
         const fee = await feeService.getFeeStructureById(req.params.id);
@@ -33,7 +44,12 @@ export const getFeeStructureById = async (req, res, next) => {
     }
 };
 
-// POST /api/fees — create fee structure
+/**
+ * Controller to create a new fee structure component (e.g., Tuition Fee for Fall 2024).
+ * Ensures no duplicates exist for the same category, year, and semester.
+ * Route: POST /api/fees/
+ * Access: Admin
+ */
 export const createFeeStructure = async (req, res, next) => {
     try {
         const fee = await feeService.createFeeStructure(req.user.id, req.body);
@@ -44,7 +60,12 @@ export const createFeeStructure = async (req, res, next) => {
     }
 };
 
-// PUT /api/fees/:id — update fee structure
+/**
+ * Controller to update an existing active fee structure.
+ * Validates that it doesn't conflict with another existing component.
+ * Route: PUT /api/fees/:id
+ * Access: Admin
+ */
 export const updateFeeStructure = async (req, res, next) => {
     try {
         const fee = await feeService.updateFeeStructure(req.params.id, req.body);
@@ -55,7 +76,12 @@ export const updateFeeStructure = async (req, res, next) => {
     }
 };
 
-// DELETE /api/fees/:id — soft-archive
+/**
+ * Controller to logically archive (soft-delete) a fee structure.
+ * Archived fees are not applied to new students in active semesters.
+ * Route: DELETE /api/fees/:id
+ * Access: Admin
+ */
 export const archiveFeeStructure = async (req, res, next) => {
     try {
         const fee = await feeService.archiveFeeStructure(req.params.id);
@@ -66,7 +92,11 @@ export const archiveFeeStructure = async (req, res, next) => {
     }
 };
 
-// PATCH /api/fees/:id/restore — restore archived fee structure
+/**
+ * Controller to restore an archived fee structure, making it active again.
+ * Route: PATCH /api/fees/:id/restore
+ * Access: Admin
+ */
 export const restoreFeeStructure = async (req, res, next) => {
     try {
         const fee = await feeService.restoreFeeStructure(req.params.id);

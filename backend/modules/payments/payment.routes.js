@@ -10,6 +10,10 @@ import {
     getReceipt,
 } from "./payment.controller.js";
 
+/**
+ * Payment Routes
+ * Manages Stripe integration endpoints: intent creation, payment confirmation, and receipt generation.
+ */
 const router = express.Router();
 
 router.post("/intent",                  authMiddleware, authRoles("student"), attachUser, createPaymentIntent);

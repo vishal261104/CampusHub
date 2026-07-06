@@ -59,7 +59,7 @@ export default function ReceiptPage() {
 
   return (
     <>
-      {/* Action Bar — hidden during print */}
+      {}
       <div className="print:hidden mb-6 bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between shadow-sm">
         <button
           onClick={() => navigate(-1)}
@@ -75,13 +75,13 @@ export default function ReceiptPage() {
         </button>
       </div>
 
-      {/* Receipt Content */}
+      {}
       <div className="pb-10 print:py-0 print:px-0">
         <div
           id="receipt"
           className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden print:shadow-none print:rounded-none print:max-w-full"
         >
-          {/* Header */}
+          {}
           <div className="bg-gradient-to-br from-emerald-600 to-teal-700 px-8 py-8 text-white">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
@@ -103,9 +103,9 @@ export default function ReceiptPage() {
             </div>
           </div>
 
-          {/* Body */}
+          {}
           <div className="px-8 py-7 space-y-6">
-            {/* Two-column info */}
+            {}
             <div className="grid grid-cols-2 gap-x-8 gap-y-4">
               <InfoRow label="Student Name" value={student?.name} />
               <InfoRow label="Student ID" value={student?.studentId || '—'} />
@@ -121,7 +121,7 @@ export default function ReceiptPage() {
 
             <hr className="border-slate-200" />
 
-            {/* Amount paid */}
+            {}
             <div className="bg-emerald-50 rounded-2xl px-6 py-5 flex items-center justify-between border border-emerald-100">
               <div>
                 <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider mb-1">Amount Paid</p>
@@ -130,7 +130,7 @@ export default function ReceiptPage() {
               <CheckCircle2 size={40} className="text-emerald-400 opacity-60" />
             </div>
 
-            {/* Fee breakdown */}
+            {}
             {feeRecord?.feeBreakdown?.length > 0 && (
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Fee Breakdown</p>
@@ -154,7 +154,7 @@ export default function ReceiptPage() {
 
             <hr className="border-slate-200" />
 
-            {/* Transaction details */}
+            {}
             <div className="space-y-2">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Transaction Details</p>
               <div className="bg-slate-50 rounded-xl px-4 py-4 space-y-2">
@@ -173,7 +173,7 @@ export default function ReceiptPage() {
             </div>
           </div>
 
-          {/* Footer */}
+          {}
           <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 text-center">
             <p className="text-xs text-slate-400">
               This is a system-generated receipt and does not require a signature.
@@ -185,7 +185,7 @@ export default function ReceiptPage() {
         </div>
       </div>
 
-      {/* Print styles */}
+      {}
       <style>{`
         @media print {
           @page { margin: 0.5in; }

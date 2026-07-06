@@ -1,8 +1,11 @@
 import * as semesterService from "../core/semester.service.js";
 import * as studentFeeService from "./studentFee.service.js";
 
-// ─── SEMESTER MANAGEMENT (Admin) ──────────────────────────────────────────────
-
+/**
+ * Controller to fetch the currently active semester configuration.
+ * Route: GET /api/fees/semester/active
+ * Access: Authenticated Users
+ */
 export const getActiveSemester = async (req, res, next) => {
     try {
         const config = await semesterService.getActiveSemester();
@@ -10,6 +13,11 @@ export const getActiveSemester = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+/**
+ * Controller to fetch all historical and active semesters.
+ * Route: GET /api/fees/semester
+ * Access: Admin
+ */
 export const getAllSemesters = async (req, res, next) => {
     try {
         const semesters = await semesterService.getAllSemesters();
@@ -17,6 +25,12 @@ export const getAllSemesters = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+/**
+ * Controller to explicitly activate a specific semester and year for the entire institution.
+ * Also configures the default fee due date for the semester.
+ * Route: POST /api/fees/semester/activate
+ * Access: Admin
+ */
 export const activateSemester = async (req, res, next) => {
     try {
         const config = await semesterService.activateSemester(req.user.id, req.body);
@@ -27,6 +41,11 @@ export const activateSemester = async (req, res, next) => {
     }
 };
 
+/**
+ * Controller to deactivate the current active semester (leaving none active).
+ * Route: PATCH /api/fees/semester/deactivate
+ * Access: Admin
+ */
 export const deactivateSemester = async (req, res, next) => {
     try {
         const config = await semesterService.deactivateSemester();
@@ -37,6 +56,11 @@ export const deactivateSemester = async (req, res, next) => {
     }
 };
 
+/**
+ * Controller to push a new global due date to the currently active semester.
+ * Route: PATCH /api/fees/semester/due-date
+ * Access: Admin
+ */
 export const updateActiveDueDate = async (req, res, next) => {
     try {
         const config = await semesterService.updateActiveDueDate(req.body.dueDate);
@@ -47,8 +71,12 @@ export const updateActiveDueDate = async (req, res, next) => {
     }
 };
 
-// ─── FEE RECORDS (Admin) ──────────────────────────────────────────────────────
-
+/**
+ * Controller to list all student fee records for the currently active semester.
+ * Useful for admins generating reports on who has/hasn't paid.
+ * Route: GET /api/fees/records
+ * Access: Admin
+ */
 export const getAllFeeRecords = async (req, res, next) => {
     try {
         const { records, activeSemester } = await studentFeeService.getAllRecordsForActiveSemester(req.query);
@@ -56,6 +84,12 @@ export const getAllFeeRecords = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+/**
+ * Controller to manually record a fee payment made by a student.
+ * Updates the 'paidAmount' field.
+ * Route: PATCH /api/fees/records/:id/pay
+ * Access: Admin
+ */
 export const updatePayment = async (req, res, next) => {
     try {
         const record = await studentFeeService.updatePaidAmount(req.params.id, req.user.id, req.body);
@@ -66,6 +100,12 @@ export const updatePayment = async (req, res, next) => {
     }
 };
 
+/**
+ * Controller to batch-generate fee records for all currently active students
+ * who don't already have one for the current semester.
+ * Route: POST /api/fees/records/sync
+ * Access: Admin
+ */
 export const syncFeeRecords = async (req, res, next) => {
     try {
         const result = await studentFeeService.syncRecordsForActiveSemester(req.user.id);
@@ -76,8 +116,12 @@ export const syncFeeRecords = async (req, res, next) => {
     }
 };
 
-// ─── STUDENT DASHBOARD ────────────────────────────────────────────────────────
-
+/**
+ * Controller for students to view their own fee breakdown, due dates, and paid status
+ * for the current active semester.
+ * Route: GET /api/fees/my-fees
+ * Access: Student
+ */
 export const getMyFeeDashboard = async (req, res, next) => {
     try {
         const result = await studentFeeService.getMyFeeDashboard(req.userDoc._id);

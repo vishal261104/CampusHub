@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BookOpen, GraduationCap, CalendarCheck, ClipboardList,
-  Settings, LogOut, ChevronRight, BookMarked, ClipboardCheck, Home, Users, BedDouble, MessageSquare, DoorOpen, IndianRupee
+  Settings, LogOut, ChevronRight, BookMarked, ClipboardCheck, Home, Users, BedDouble, MessageSquare, DoorOpen, IndianRupee, Bus
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ProfileCard from '../ui/ProfileCard';
@@ -18,6 +18,7 @@ const navConfig = {
     { label: 'My Complaints', to: '/hostel/complaints', icon: MessageSquare },
     { label: 'Outing & Leave', to: '/hostel/outing', icon: DoorOpen },
     { label: 'My Fees', to: '/fees/my-fees', icon: IndianRupee },
+    { label: 'Transport', to: '/transport', icon: Bus },
   ],
   faculty: [
     { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
@@ -33,6 +34,7 @@ const navConfig = {
     { label: 'Course Catalog', to: '/courses/catalog', icon: GraduationCap },
     { label: 'Enrollment Requests', to: '/enrollment/admin', icon: ClipboardList },
     { label: 'Fee Structures', to: '/fees/manage', icon: IndianRupee },
+    { label: 'Transport', to: '/transport/admin', icon: Bus },
   ],
   hostelAdmin: [
     { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
@@ -58,7 +60,7 @@ export default function Sidebar({ onClose }) {
 
   return (
     <div className="flex flex-col h-full bg-white border-r border-slate-200 w-64 flex-shrink-0 relative z-10">
-      {/* Logo */}
+      {}
       <div onClick={() => navigate('/dashboard')} className="px-5 py-5 border-b border-slate-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors group">
         <div className="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg border border-slate-200 bg-white shadow-sm transition-shadow group-hover:shadow-md">
           <span className="font-serif text-xl font-extrabold text-slate-900 leading-none tracking-tighter">C</span>
@@ -69,7 +71,7 @@ export default function Sidebar({ onClose }) {
         </div>
       </div>
 
-      {/* User info */}
+      {}
       <div className="px-4 py-4 border-b border-slate-100 flex justify-center">
         <div onClick={() => { navigate('/profile'); onClose?.(); }} className="cursor-pointer w-full">
           <ProfileCard
@@ -81,7 +83,7 @@ export default function Sidebar({ onClose }) {
         </div>
       </div>
 
-      {/* Navigation */}
+      {}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {items.map(({ label, to, icon: Icon }) => (
           <NavLink
@@ -96,7 +98,7 @@ export default function Sidebar({ onClose }) {
         ))}
       </nav>
 
-      {/* Bottom */}
+      {}
       <div className="px-3 py-4 border-t border-slate-100 space-y-1">
         <NavLink to="/profile" onClick={onClose} className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
           <Settings size={16} className="flex-shrink-0" />

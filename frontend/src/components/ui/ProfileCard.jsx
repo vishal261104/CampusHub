@@ -4,9 +4,9 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 
-// --- Animation Physics & Variants ---
 
-// 1. The "Fluid" Spring: softer and more elastic feeling
+
+
 const fluidTransition = {
   type: "spring",
   stiffness: 260,
@@ -14,30 +14,30 @@ const fluidTransition = {
   mass: 1,
 };
 
-// 2. Container for staggering text elements smoothly
+
 const contentContainerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08, // The delay between name and role appearing
-      delayChildren: 0.02,   // Start almost immediately upon expansion
+      staggerChildren: 0.08, 
+      delayChildren: 0.02,   
     },
   },
   exit: {
     opacity: 0,
-    transition: { duration: 0.1 }, // Exit FAST so the box can collapse cleanly
+    transition: { duration: 0.1 }, 
   },
 };
 
-// 3. The "Elegant Reveal": slides up while un-blurring
+
 const elegantItemVariants = {
   hidden: { y: 12, opacity: 0, filter: "blur(6px)" },
   visible: {
     y: 0,
     opacity: 1,
     filter: "blur(0px)",
-    transition: fluidTransition, // Use the same fluid physics for elements
+    transition: fluidTransition, 
   },
 };
 
@@ -55,7 +55,7 @@ export default function ProfileCard({
       <motion.div
         className={cn(
           "relative z-0 flex items-center overflow-hidden",
-          // Base bg + text for both themes
+          
           "bg-white text-slate-900 border border-slate-200 shadow-sm"
         )}
         style={{ cursor: "default" }}
@@ -69,10 +69,10 @@ export default function ProfileCard({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Decorative layers */}
+        {}
         <div className="absolute inset-0 z-20 rounded-[40px] pointer-events-none" />
 
-        {/* Gradient background reacts to theme */}
+        {}
         <div
           className={cn(
             "absolute inset-0 transition-opacity duration-500 z-0",
@@ -81,18 +81,18 @@ export default function ProfileCard({
           )}
         />
 
-        {/* --- Avatar Wrapper --- */}
+        {}
         <motion.div
-          layout="position" // Keeps avatar anchored smoothly during expansion
+          layout="position" 
           className="relative z-30 h-14 w-14 shrink-0 m-1.5"
         >
-          {/* Living Ambient Glow: Rotates slowly to feel alive */}
+          {}
           <motion.div
             className="absolute inset-0 rounded-full blur-xl bg-primary-100/50"
             animate={{
               scale: isHovered ? 1.6 : 0.8,
               opacity: isHovered ? 1 : 0,
-              rotate: isHovered ? [0, 360] : 0, // Slow rotation
+              rotate: isHovered ? [0, 360] : 0, 
             }}
             transition={{
               scale: { duration: 0.4, ease: "easeOut" },
@@ -101,7 +101,7 @@ export default function ProfileCard({
             }}
           />
 
-          {/* Avatar Image */}
+          {}
           <motion.img
             src={imageSrc}
             alt={name}
@@ -110,7 +110,7 @@ export default function ProfileCard({
             transition={fluidTransition}
           />
 
-          {/* Status Dot Pop-in */}
+          {}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: isHovered ? 1 : 0 }}
@@ -119,20 +119,20 @@ export default function ProfileCard({
           />
         </motion.div>
 
-        {/* --- Text Content --- */}
+        {}
         <div className="relative z-20 overflow-hidden">
-          {/* Use mode="wait" for cleaner exit/enter transitions */}
+          {}
           <AnimatePresence mode="wait">
             {isHovered && (
               <motion.div
-                // Connect to our staggered container variants
+                
                 variants={contentContainerVariants}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
                 className="flex flex-col justify-center pl-4 pr-8 min-w-[180px]"
               >
-                {/* Header Row: Name & Social */}
+                {}
                 <div className="flex items-center justify-between gap-6 mb-1">
                   <motion.h3
                     variants={elegantItemVariants}
@@ -154,7 +154,7 @@ export default function ProfileCard({
                   )}
                 </div>
 
-                {/* Bottom Row: Role & Action */}
+                {}
                 <motion.div
                   variants={elegantItemVariants}
                   className="flex items-center gap-2 whitespace-nowrap"

@@ -19,7 +19,7 @@ export default function Topbar({ onMenuClick, title }) {
   };
   const roleBadgeColors = { admin: 'text-slate-700 bg-slate-100', faculty: 'text-zinc-700 bg-zinc-100', student: 'text-stone-700 bg-stone-100' };
 
-  // Close dropdown when clicking outside
+  
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -71,7 +71,7 @@ export default function Topbar({ onMenuClick, title }) {
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-lg shadow-slate-200/60 overflow-hidden z-50 origin-top-right"
             >
-              {/* User info */}
+              {}
               <div className="px-4 py-3 border-b border-slate-100">
                 <p className="text-sm font-semibold text-slate-800 truncate">{user?.name}</p>
                 <p className="text-xs text-slate-400 truncate">{user?.email}</p>
@@ -80,7 +80,7 @@ export default function Topbar({ onMenuClick, title }) {
                 </span>
               </div>
 
-              {/* Actions */}
+              {}
               <div className="py-1">
                 <button
                   onClick={() => { setOpen(false); navigate('/profile'); }}

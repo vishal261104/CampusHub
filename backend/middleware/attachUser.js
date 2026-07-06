@@ -1,12 +1,6 @@
 import User from '../modules/users/user.model.js';
 
-/**
- * Middleware: Fetches the full user document from the DB and attaches it to req.userDoc.
- * Must run AFTER authMiddleware (which sets req.user from JWT).
- *
- * This ensures controllers always use DB-verified data (gender, studentId, employeeId)
- * rather than trusting anything from the client.
- */
+
 export default async function attachUser(req, res, next) {
   try {
     const userId = req.user?.id;

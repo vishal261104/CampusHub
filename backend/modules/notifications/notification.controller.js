@@ -1,6 +1,9 @@
 import * as notificationService from "./notification.service.js";
 
-// GET /api/notifications
+
+/**
+ * Retrieves the current user's notifications and unread count.
+ */
 export const getMyNotifications = async (req, res, next) => {
     try {
         const notifications = await notificationService.getMyNotifications(req.userDoc._id);
@@ -11,7 +14,10 @@ export const getMyNotifications = async (req, res, next) => {
     }
 };
 
-// PATCH /api/notifications/read-all
+
+/**
+ * Marks all notifications for the current user as read.
+ */
 export const markAllRead = async (req, res, next) => {
     try {
         await notificationService.markAllRead(req.userDoc._id);
@@ -21,7 +27,10 @@ export const markAllRead = async (req, res, next) => {
     }
 };
 
-// PATCH /api/notifications/:id/read
+
+/**
+ * Marks a specific notification as read.
+ */
 export const markOneRead = async (req, res, next) => {
     try {
         const notification = await notificationService.markOneRead(req.userDoc._id, req.params.id);

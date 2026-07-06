@@ -123,7 +123,7 @@ export default function StudentOutingPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-5">
 
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
@@ -157,7 +157,7 @@ export default function StudentOutingPage() {
         </div>
       </div>
 
-      {/* Active Outing Banner */}
+      {}
       {activeOuting && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
@@ -182,7 +182,7 @@ export default function StudentOutingPage() {
         </div>
       )}
 
-      {/* Tabs */}
+      {}
       <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
         {[{ id: 'outings', label: 'Day Outings' }, { id: 'leave', label: 'Leave Requests' }].map(t => (
           <button
@@ -201,7 +201,7 @@ export default function StudentOutingPage() {
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       ) : (
 
-        // ── Outings tab ──
+        
         tab === 'outings' ? (
           outings.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 py-16 text-center text-slate-400">
@@ -213,7 +213,7 @@ export default function StudentOutingPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Table header */}
+              {}
               <div className="hidden sm:grid grid-cols-5 gap-3 px-4 py-2 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 <span>Date</span><span>Purpose</span><span>Out</span><span>In</span><span>Status</span>
               </div>
@@ -243,7 +243,7 @@ export default function StudentOutingPage() {
 
         ) : (
 
-          // ── Leave tab ──
+          
           leaves.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 py-16 text-center text-slate-400">
               <CalendarDays size={36} className="mx-auto mb-3 opacity-30" />
@@ -296,7 +296,7 @@ export default function StudentOutingPage() {
         )
       )}
 
-      {/* ── New Outing Modal ── */}
+      {}
       {showOutingForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowOutingForm(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-slide-up" onClick={e => e.stopPropagation()}>
@@ -335,7 +335,7 @@ export default function StudentOutingPage() {
         </div>
       )}
 
-      {/* ── Leave Request Modal ── */}
+      {}
       {showLeaveForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowLeaveForm(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-slide-up" onClick={e => e.stopPropagation()}>

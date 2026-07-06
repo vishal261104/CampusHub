@@ -1,6 +1,9 @@
 import * as userService from "./user.service.js";
 
-// Handles HTTP request to retrieve the authenticated user's profile.
+
+/**
+ * Retrieves the currently logged-in user's profile information.
+ */
 export async function getMe(req, res, next) {
   try {
     const user = await userService.getProfile(req.user?.id);
@@ -11,7 +14,10 @@ export async function getMe(req, res, next) {
   }
 }
 
-// Handles HTTP request to update the authenticated user's profile fields.
+
+/**
+ * Updates the currently logged-in user's profile details.
+ */
 export async function updateMe(req, res, next) {
   try {
     const updated = await userService.updateProfile(req.user?.id, req.body);
@@ -22,7 +28,10 @@ export async function updateMe(req, res, next) {
   }
 }
 
-// Handles HTTP request to update the authenticated user's password.
+
+/**
+ * Updates the currently logged-in user's password.
+ */
 export async function updatePassword(req, res, next) {
   try {
     await userService.updatePassword(req.user?.id, req.body);
@@ -33,7 +42,10 @@ export async function updatePassword(req, res, next) {
   }
 }
 
-// Handles HTTP request to list all registered users.
+
+/**
+ * Retrieves a list of all users in the system (Admin only).
+ */
 export async function getAllUsers(req, res, next) {
   try {
     const users = await userService.getAllUsers();

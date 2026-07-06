@@ -26,11 +26,11 @@ const roomAllocationSchema = new mongoose.Schema({
     }
 });
 
-// One student → one active allocation
+
 roomAllocationSchema.index({ studentId: 1, isActive: 1 });
-// Fast lookup of who is in a room
+
 roomAllocationSchema.index({ roomId: 1, isActive: 1 });
-// Unique: one active allocation per application
+
 roomAllocationSchema.index({ applicationId: 1 }, { unique: true });
 
 export default mongoose.model("RoomAllocation", roomAllocationSchema);

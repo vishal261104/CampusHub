@@ -3,20 +3,20 @@ import User from "../users/user.model.js";
 import Course from "./course.model.js";
 import SemesterConfig from "../core/semesterConfig.model.js";
 
-// Safely parses a value into an integer, falling back to a default value if invalid.
+
 function toInt(value, fallback) {
   const n = Number.parseInt(String(value), 10);
   return Number.isFinite(n) ? n : fallback;
 }
 
-// Converts an HH:MM time string to the number of minutes since midnight.
+
 function timeToMinutes(hhmm) {
   const [h, m] = String(hhmm).split(':').map((x) => Number.parseInt(x, 10));
   if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
   return h * 60 + m;
 }
 
-// Validates that an array of meeting slots has correct time formats and order.
+
 function validateMeetings(meetings) {
   if (!Array.isArray(meetings) || meetings.length === 0) {
     return { ok: false, message: 'meetings must be a non-empty array' };
@@ -34,14 +34,14 @@ function validateMeetings(meetings) {
   return { ok: true };
 }
 
-// Safely parses a value into a Date object or returns null if invalid.
+
 function parseDateOrNull(value) {
   if (value === undefined || value === null || value === '') return null;
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-// Resolves a faculty database ID from either facultyId or facultyEmail.
+
 async function resolveFacultyId({ facultyId, facultyEmail }) {
   if (facultyId) {
     const faculty = await User.findById(facultyId);
@@ -67,7 +67,7 @@ async function resolveFacultyId({ facultyId, facultyEmail }) {
   throw err;
 }
 
-// Resolves a course database ID from either courseId or courseCode.
+
 async function resolveCourseId({ courseId, courseCode }) {
   if (courseId) {
     const course = await Course.findById(courseId);
@@ -93,7 +93,12 @@ async function resolveCourseId({ courseId, courseCode }) {
   throw err;
 }
 
-// Creates a new course offering with full validation.
+
+/**
+ * Creates a new course offering for a specific semester and year.
+ * Validates course existence, faculty assignment, capacity, and meeting schedules.
+ * @param {Object} body - Offering details (courseId, semester, year, faculty, capacity, meetings, etc.)
+ */
 export async function createOffering(body) {
   const { courseId, courseCode, semester, year, facultyId, facultyEmail, capacity, section, status, meetings, enrollStarts, enrollEnds } = body;
 
@@ -163,7 +168,14 @@ export async function createOffering(body) {
   return offering;
 }
 
-// Updates an existing course offering with validation.
+
+/**
+ * Updates an existing course offering.
+ * Supports updating course, faculty, capacity, dates, and meetings.
+ * Validates that capacity does not drop below current enrollments.
+ * @param {String} offeringId - Course offering ID
+ * @param {Object} body - Fields to update
+ */
 export async function updateOffering(offeringId, body) {
   const offering = await CourseOffering.findById(offeringId);
   if (!offering) {
@@ -244,7 +256,12 @@ export async function updateOffering(offeringId, body) {
   return updated;
 }
 
-// Deletes a course offering by ID.
+
+/**
+ * Permanently deletes a course offering.
+ * Note: Should ideally verify that no students are actively enrolled before deletion.
+ * @param {String} offeringId - Course offering ID
+ */
 export async function deleteOffering(offeringId) {
   const deleted = await CourseOffering.findByIdAndDelete(offeringId);
   if (!deleted) {
@@ -255,7 +272,11 @@ export async function deleteOffering(offeringId) {
   return deleted;
 }
 
-// Retrieves a single course offering by ID with populated course and faculty.
+
+/**
+ * Retrieves a single course offering and populates its associated course and faculty details.
+ * @param {String} offeringId - Course offering ID
+ */
 export async function getOffering(offeringId) {
   const offering = await CourseOffering.findById(offeringId)
     .populate({ path: "courseId", select: "courseCode courseTitle credits department description" })
@@ -268,7 +289,14 @@ export async function getOffering(offeringId) {
   return offering;
 }
 
-// Retrieves a paginated list of offerings matching filters, optionally scoped to a faculty member.
+
+/**
+ * Lists course offerings with support for pagination, semester filtering, and role-based access.
+ * If userRole is 'faculty', strictly limits the results to offerings taught by that faculty member.
+ * @param {Object} query - Filtering and pagination params (semester, year, status, courseCode)
+ * @param {String} userRole - Role of the requester (e.g., 'admin' or 'faculty')
+ * @param {String} userId - ID of the requester (used if role is faculty)
+ */
 export async function listOfferings(query, userRole, userId) {
   let { semester, year } = query;
 
@@ -314,7 +342,7 @@ export async function listOfferings(query, userRole, userId) {
     filter.courseId = await resolveCourseId({ courseCode: query.courseCode });
   }
 
-  // Faculty only sees their own offerings
+  
   if (userRole === 'faculty') {
     filter.facultyId = userId;
   } else {
@@ -341,7 +369,12 @@ export async function listOfferings(query, userRole, userId) {
   return { count, page, limit, offerings };
 }
 
-// Retrieves course catalog (public-facing) with search, department filter, and pagination.
+
+/**
+ * General purpose endpoint to fetch the full course catalog offerings for students and public viewing.
+ * Applies powerful search features (regex across course titles and codes) and department filters.
+ * @param {Object} query - Filtering and search params
+ */
 export async function getCourseCatalog(query) {
   let { semester, year, status, courseCode, search, department } = query;
 
@@ -418,7 +451,13 @@ export async function getCourseCatalog(query) {
   return { count, page, limit, offerings };
 }
 
-// Assigns a faculty member to a specific course offering.
+
+/**
+ * Re-assigns a faculty member to a specific course offering.
+ * Resolves the faculty by ID or exact email address.
+ * @param {String} offeringId - Course offering ID
+ * @param {Object} facultyParams - Object containing facultyId or facultyEmail
+ */
 export async function assignFaculty(offeringId, { facultyId, facultyEmail }) {
   if (!facultyId && !facultyEmail) {
     const err = new Error('facultyId or facultyEmail is required');

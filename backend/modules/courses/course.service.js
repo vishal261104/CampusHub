@@ -1,13 +1,19 @@
 import Course from "./course.model.js";
 
-// Creates a new course in the catalog.
+/**
+ * Creates a new master course in the catalog.
+ * @param {Object} data - Contains courseCode, courseTitle, credits, department, description
+ */
 export async function createCourse({ courseCode, courseTitle, credits, department, description }) {
   const course = new Course({ courseCode, courseTitle, credits, department, description });
   await course.save();
   return course;
 }
 
-// Retrieves a single course by ID.
+/**
+ * Retrieves a single master course by its ID.
+ * @param {String} courseId - The MongoDB ObjectID of the course
+ */
 export async function getCourse(courseId) {
   const course = await Course.findById(courseId);
   if (!course) {
@@ -18,7 +24,11 @@ export async function getCourse(courseId) {
   return course;
 }
 
-// Updates an existing course's details.
+/**
+ * Updates details of a master course. At least one field must be provided.
+ * @param {String} courseId - The MongoDB ObjectID of the course
+ * @param {Object} data - Fields to update (courseCode, courseTitle, credits, department, description)
+ */
 export async function updateCourse(courseId, { courseCode, courseTitle, credits, department, description }) {
   if (!courseCode && !courseTitle && credits === undefined && !department && !description) {
     const err = new Error("At least one field (courseCode, courseTitle, credits, department, description) is required to update");
@@ -38,7 +48,11 @@ export async function updateCourse(courseId, { courseCode, courseTitle, credits,
   return updated;
 }
 
-// Deletes a course by ID.
+/**
+ * Permanently deletes a master course from the catalog.
+ * Note: This does not cascade delete related course offerings or enrollments in the current implementation.
+ * @param {String} courseId - The MongoDB ObjectID of the course
+ */
 export async function deleteCourse(courseId) {
   const deleted = await Course.findByIdAndDelete(courseId);
   if (!deleted) {
@@ -49,7 +63,12 @@ export async function deleteCourse(courseId) {
   return deleted;
 }
 
-// Retrieves a paginated list of courses, optionally filtered by department or search query.
+/**
+ * Fetches a paginated list of all master courses.
+ * Supports filtering by department and a generic text search (course title, code, or department).
+ * @param {Object} queryParams - Contains page, limit, department, and search string
+ * @returns {Object} Paginated response containing course list, current page, limit, and total count
+ */
 export async function getAllCourses({ page = 1, limit = 20, department, search }) {
   const p = Math.max(1, parseInt(String(page), 10) || 1);
   const l = Math.min(100, Math.max(1, parseInt(String(limit), 10) || 20));

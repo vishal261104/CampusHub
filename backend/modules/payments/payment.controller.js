@@ -1,6 +1,9 @@
 import * as stripeService from "./payment.service.js";
 
-// POST /api/payments/intent
+
+/**
+ * Initiates an online payment flow using Stripe (creates Payment Intent).
+ */
 export const createPaymentIntent = async (req, res, next) => {
     try {
         const result = await stripeService.createPaymentIntent(
@@ -14,7 +17,10 @@ export const createPaymentIntent = async (req, res, next) => {
     }
 };
 
-// POST /api/payments/confirm
+
+/**
+ * Confirms a successful Stripe payment and updates the student's fee record.
+ */
 export const confirmPayment = async (req, res, next) => {
     try {
         const { feePayment, feeRecord } = await stripeService.confirmPayment(
@@ -32,7 +38,10 @@ export const confirmPayment = async (req, res, next) => {
     }
 };
 
-// GET /api/payments/history/:feeRecordId
+
+/**
+ * Fetches the payment history/transactions for a specific fee record.
+ */
 export const getPaymentHistory = async (req, res, next) => {
     try {
         const payments = await stripeService.getPaymentHistory(
@@ -46,7 +55,10 @@ export const getPaymentHistory = async (req, res, next) => {
     }
 };
 
-// GET /api/payments/receipt/:paymentId
+
+/**
+ * Retrieves the details of a successful payment for generating a receipt.
+ */
 export const getReceipt = async (req, res, next) => {
     try {
         const payment = await stripeService.getReceipt(

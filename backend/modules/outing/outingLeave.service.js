@@ -3,7 +3,7 @@ import LeaveRequest from "./leaveRequest.model.js";
 import RoomAllocation from "../hostel/roomAllocation.model.js";
 import HostelSettings from "../hostel/hostelSettings.model.js";
 
-// Validates that a student has an active room allocation before allowing outing/leave actions.
+
 async function requireActiveAllocation(studentId) {
     const allocation = await RoomAllocation.findOne({ studentId, isActive: true });
     if (!allocation) {
@@ -14,7 +14,7 @@ async function requireActiveAllocation(studentId) {
     return allocation;
 }
 
-// Returns true if the given Date is at or after the configured late-return threshold.
+
 async function isLate(dateTime) {
     const settings = await HostelSettings.getSingleton();
     const h = dateTime.getHours();
@@ -23,14 +23,20 @@ async function isLate(dateTime) {
         (h === settings.lateReturnHour && m >= settings.lateReturnMinute);
 }
 
-// ─── SETTINGS ─────────────────────────────────────────────────────────────────
 
-// Returns the current hostel settings (late return threshold).
+
+
+/**
+ * Retrieves hostel settings (e.g. late return times).
+ */
 export async function getSettings() {
     return HostelSettings.getSingleton();
 }
 
-// Updates the late return threshold hour and minute. Only hostelAdmin can call this.
+
+/**
+ * Updates the late return threshold time in the global hostel settings.
+ */
 export async function updateLateThreshold(adminId, { lateReturnHour, lateReturnMinute }) {
     const hour = parseInt(lateReturnHour, 10);
     const minute = parseInt(lateReturnMinute ?? 0, 10);
@@ -54,9 +60,13 @@ export async function updateLateThreshold(adminId, { lateReturnHour, lateReturnM
     return settings;
 }
 
-// ─── OUTINGS ──────────────────────────────────────────────────────────────────
 
-// Creates a same-day outing entry for a student. Rejects if the student already has an active outing.
+
+
+/**
+ * Creates a new outing record for the specified student.
+ * Ensures the student has an active room allocation and doesn't already have an active outing.
+ */
 export async function createOuting(studentId, { purpose, expectedReturnTime }) {
     await requireActiveAllocation(studentId);
 
@@ -76,7 +86,11 @@ export async function createOuting(studentId, { purpose, expectedReturnTime }) {
     return Outing.create({ studentId, purpose: purpose.trim(), expectedReturnTime: expectedReturnTime.trim() });
 }
 
-// Marks a student's active outing as completed. Flags as late if check-in time is past the DB-configured threshold.
+
+/**
+ * Completes an active outing by marking the student as checked in.
+ * Determines if the return was late based on the hostel's late threshold.
+ */
 export async function checkIn(studentId) {
     const outing = await Outing.findOne({ studentId, status: "active" });
     if (!outing) {
@@ -93,19 +107,28 @@ export async function checkIn(studentId) {
     return outing;
 }
 
-// Returns a student's full outing history, newest first.
+
+/**
+ * Retrieves all outing records for a given student.
+ */
 export async function getMyOutings(studentId) {
     return Outing.find({ studentId }).sort({ createdAt: -1 });
 }
 
-// Returns all currently active outings (students outside hostel). Admin dashboard.
+
+/**
+ * Retrieves all currently active outings for all students.
+ */
 export async function getActiveOutings() {
     return Outing.find({ status: "active" })
         .populate("studentId", "name email studentId")
         .sort({ outTime: 1 });
 }
 
-// Returns all outings with optional filters for admin. Supports status filter and pagination.
+
+/**
+ * Fetches paginated outings with optional status filtering.
+ */
 export async function getAllOutings({ status, page = 1, limit = 30 } = {}) {
     const filter = {};
     if (status) filter.status = status;
@@ -125,9 +148,13 @@ export async function getAllOutings({ status, page = 1, limit = 30 } = {}) {
     return { count, page: p, limit: l, outings };
 }
 
-// ─── LEAVE REQUESTS ───────────────────────────────────────────────────────────
 
-// Creates an overnight/multi-day leave request for a student.
+
+
+/**
+ * Creates a new multi-day leave request for a student.
+ * Validates dates and ensures the student has an active room allocation.
+ */
 export async function createLeaveRequest(studentId, { reason, fromDate, toDate, emergencyContact }) {
     await requireActiveAllocation(studentId);
 
@@ -159,12 +186,18 @@ export async function createLeaveRequest(studentId, { reason, fromDate, toDate, 
     });
 }
 
-// Returns all leave requests for the authenticated student, newest first.
+
+/**
+ * Fetches all leave requests for a given student.
+ */
 export async function getMyLeaveRequests(studentId) {
     return LeaveRequest.find({ studentId }).sort({ createdAt: -1 });
 }
 
-// Returns all leave requests for admin with optional status filter.
+
+/**
+ * Fetches paginated leave requests with optional status filtering.
+ */
 export async function getAllLeaveRequests({ status, page = 1, limit = 30 } = {}) {
     const filter = {};
     const allowed = ["pending", "approved", "rejected"];
@@ -192,7 +225,10 @@ export async function getAllLeaveRequests({ status, page = 1, limit = 30 } = {})
     return { count, page: p, limit: l, requests };
 }
 
-// Approves or rejects a leave request. Sets reviewedAt and optional reviewNote.
+
+/**
+ * Reviews a pending leave request, changing its status to approved or rejected.
+ */
 export async function reviewLeaveRequest(leaveId, action, reviewNote = "") {
     const allowed = ["approved", "rejected"];
     if (!allowed.includes(action)) {

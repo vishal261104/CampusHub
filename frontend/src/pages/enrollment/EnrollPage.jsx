@@ -13,8 +13,8 @@ const SEMESTERS = ['Spring', 'Summer', 'Fall', 'Winter'];
 export default function EnrollPage() {
   const [offerings, setOfferings] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
-  const [feeRecord, setFeeRecord] = useState(null);       // student's fee record for active semester
-  const [activeSemester, setActiveSemester] = useState(null); // active semester from server
+  const [feeRecord, setFeeRecord] = useState(null);       
+  const [activeSemester, setActiveSemester] = useState(null); 
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [semester, setSemester] = useState('Fall');
@@ -31,7 +31,7 @@ export default function EnrollPage() {
       ]);
       setOfferings(offerRes.data.offerings || []);
       setEnrollments(enrRes.data.enrollments || []);
-      // Dashboard returns { record, activeSemester } — a single record for the active semester
+      
       setFeeRecord(feeRes.data.record || null);
       setActiveSemester(feeRes.data.activeSemester || null);
     } catch (err) {
@@ -74,8 +74,8 @@ export default function EnrollPage() {
     return !q || course?.courseCode?.toLowerCase().includes(q) || course?.courseTitle?.toLowerCase().includes(q) || course?.department?.toLowerCase().includes(q);
   });
 
-  // Check if the selected semester matches the ACTIVE semester and if fees are paid.
-  // Only enforce fee constraint when the student is trying to enroll in the active semester.
+  
+  
   const isActiveSemesterSelected =
     activeSemester &&
     activeSemester.semester === semester &&
@@ -102,7 +102,7 @@ export default function EnrollPage() {
         </div>
       )}
 
-      {/* Filters */}
+      {}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />

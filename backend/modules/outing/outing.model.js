@@ -12,7 +12,7 @@ const outingSchema = new mongoose.Schema({
         maxlength: 200,
     },
     expectedReturnTime: {
-        type: String, // HH:MM format, e.g. "19:00"
+        type: String, 
         required: true,
     },
     outTime: {
@@ -34,9 +34,9 @@ const outingSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-// Fast query for active outings (caretaker dashboard)
+
 outingSchema.index({ status: 1 });
-// Fast query for a student's history
+
 outingSchema.index({ studentId: 1 });
 
 export default mongoose.model("Outing", outingSchema);

@@ -9,7 +9,7 @@ import {
   BookOpen, Home, ClipboardList, Library, Wrench, CreditCard, History, X, ArrowRight, FileText
 } from 'lucide-react';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function fmtINR(n) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
 }
@@ -48,7 +48,7 @@ const STATUS_CFG = {
   Pending: { label: 'Payment Pending', cls: 'bg-rose-50  text-rose-700   border-rose-200',     icon: AlertTriangle },
 };
 
-// ─── Payment Modal ────────────────────────────────────────────────────────────
+
 function PaymentModal({ record, onClose, onSuccess }) {
   const [amount, setAmount]             = useState('');
   const [step, setStep]                 = useState('amount');
@@ -56,7 +56,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
   const [error, setError]               = useState('');
   const [loading, setLoading]           = useState(false);
 
-  const stripeRef  = useRef(null);  // { stripe, elements, clientSecret, paymentEl }
+  const stripeRef  = useRef(null);  
   const mountedRef = useRef(false);
 
   const pending = record.totalAmount - record.paidAmount;
@@ -66,7 +66,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
     setAmount(String(Math.min(val, pending)));
   };
 
-  // Helper to manually destroy the Stripe element
+  
   const destroyStripeElement = () => {
     if (stripeRef.current?.paymentEl) {
       try { stripeRef.current.paymentEl.unmount(); } catch (_) {}
@@ -76,14 +76,14 @@ function PaymentModal({ record, onClose, onSuccess }) {
     setElementReady(false);
   };
 
-  // Clean up on component unmount (modal closed)
+  
   useEffect(() => {
     return () => destroyStripeElement();
   }, []);
 
-  // ── Mount Stripe Payment Element when step becomes 'stripe'
-  // NO cleanup function — we manually unmount in handleBack / component unmount.
-  // This prevents the element from being destroyed when step goes to 'processing'.
+  
+  
+  
   useEffect(() => {
     if (step !== 'stripe') return;
     if (mountedRef.current) return;
@@ -102,12 +102,12 @@ function PaymentModal({ record, onClose, onSuccess }) {
     paymentEl.on('ready', () => setElementReady(true));
     paymentEl.mount('#stripe-payment-element');
 
-    // Store on ref — no re-render
+    
     stripeRef.current.paymentEl = paymentEl;
-    // No return cleanup! We manage unmounting manually.
+    
   }, [step]);
 
-  // ── Step 1 → 2: create PaymentIntent, store in ref, switch step
+  
   const handleProceed = async () => {
     const amt = parseFloat(amount);
     if (isNaN(amt) || amt < 50) return setError('Enter a valid amount (min ₹50)');
@@ -139,12 +139,12 @@ function PaymentModal({ record, onClose, onSuccess }) {
     }
   };
 
-  // ── Step 2 → 3: confirm payment
-  // CRITICAL: capture stripe & elements BEFORE calling setStep, so they survive re-render.
+  
+  
   const handlePay = async () => {
     if (!stripeRef.current || !elementReady) return;
 
-    // Grab references before any state changes
+    
     const { stripe, elements, clientSecret } = stripeRef.current;
 
     setStep('processing');
@@ -172,7 +172,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
     }
   };
 
-  // ── Go back to amount step — manually clean up Stripe element
+  
   const handleBack = () => {
     destroyStripeElement();
     setStep('amount');
@@ -187,7 +187,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100 sticky top-0 bg-white z-10">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -210,7 +210,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
         </div>
 
         <div className="px-6 py-5">
-          {/* ── Step: Done ── */}
+          {}
           {step === 'done' && (
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
@@ -229,7 +229,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* ── Step: Amount Entry ── */}
+          {}
           {step === 'amount' && (
             <div className="space-y-4">
               <div>
@@ -249,7 +249,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
                     className="w-full pl-7 pr-4 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all bg-white font-mono"
                   />
                 </div>
-                {/* Quick presets */}
+                {}
                 <div className="flex gap-2 mt-2">
                   {[25, 50, 75, 100].map(pct => (
                     <button
@@ -297,7 +297,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* ── Step: Processing ── */}
+          {}
           {step === 'processing' && (
             <div className="text-center space-y-4 py-6">
               <Spinner size="lg" />
@@ -305,10 +305,8 @@ function PaymentModal({ record, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* ── Step: Stripe Payment Element ── */}
-          {/* IMPORTANT: render during BOTH 'stripe' AND 'processing' so the element
-              stays mounted while stripe.confirmPayment() is in flight.
-              During 'processing' we just visually hide it. */}
+          {}
+          {}
           {(step === 'stripe' || step === 'processing') && (
             <div className={step === 'processing' ? 'hidden' : 'space-y-4'}>
               <div className="bg-slate-50 rounded-xl px-4 py-3 flex justify-between items-center">
@@ -316,7 +314,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
                 <span className="text-base font-bold text-slate-900">{fmtINR(parseFloat(amount))}</span>
               </div>
 
-              {/* Loading spinner while Stripe mounts */}
+              {}
               {!elementReady && (
                 <div className="flex items-center justify-center gap-2 py-6 text-slate-400">
                   <Spinner size="sm" />
@@ -324,7 +322,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
                 </div>
               )}
 
-              {/* Stripe mounts its Payment Element here */}
+              {}
               <div id="stripe-payment-element" className={elementReady ? '' : 'h-0 overflow-hidden'} />
 
               {error && (
@@ -355,7 +353,7 @@ function PaymentModal({ record, onClose, onSuccess }) {
   );
 }
 
-// ─── Payment History Panel ────────────────────────────────────────────────────
+
 function PaymentHistory({ feeRecordId, onClose }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -411,7 +409,7 @@ function PaymentHistory({ feeRecordId, onClose }) {
                     </div>
                   </div>
 
-                  {/* Action buttons */}
+                  {}
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => { onClose(); navigate(`/fees/receipt/${p._id}`); }}
@@ -440,7 +438,7 @@ function PaymentHistory({ feeRecordId, onClose }) {
   );
 }
 
-// ─── AmountCard ───────────────────────────────────────────────────────────────
+
 function AmountCard({ label, value, color }) {
   return (
     <div className={`${color} rounded-2xl p-5 flex flex-col gap-1`}>
@@ -450,7 +448,7 @@ function AmountCard({ label, value, color }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+
 export default function StudentFeeDashboard() {
   const [data, setData]             = useState(null);
   const [loading, setLoading]       = useState(true);
@@ -462,7 +460,7 @@ export default function StudentFeeDashboard() {
       const res = await getMyFeeDashboard();
       setData(res.data);
     } catch {
-      // silently fail
+      
     } finally {
       setLoading(false);
     }
@@ -510,7 +508,7 @@ export default function StudentFeeDashboard() {
   return (
     <div className="max-w-2xl mx-auto space-y-5">
 
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600"><IndianRupee size={20} /></div>
@@ -532,7 +530,7 @@ export default function StudentFeeDashboard() {
         </div>
       </div>
 
-      {/* Semester hero card */}
+      {}
       <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-6 text-white shadow-lg`}>
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
@@ -553,7 +551,7 @@ export default function StudentFeeDashboard() {
             )}
           </div>
         </div>
-        {/* Progress */}
+        {}
         <div className="mt-5">
           <div className="flex justify-between text-xs opacity-80 mb-1.5">
             <span>{paidPct}% paid</span>
@@ -565,14 +563,14 @@ export default function StudentFeeDashboard() {
         </div>
       </div>
 
-      {/* Amount cards */}
+      {}
       <div className="grid grid-cols-3 gap-3">
         <AmountCard label="Total Fees" value={record.totalAmount} color="bg-slate-50 border border-slate-200 text-slate-700" />
         <AmountCard label="Paid" value={record.paidAmount} color="bg-emerald-50 border border-emerald-100 text-emerald-700" />
         <AmountCard label="Pending" value={pending} color={pending > 0 ? 'bg-rose-50 border border-rose-100 text-rose-700' : 'bg-emerald-50 border border-emerald-100 text-emerald-700'} />
       </div>
 
-      {/* Pay Now CTA */}
+      {}
       {pending > 0 && (
         <div className={`rounded-2xl border px-5 py-4 flex items-center justify-between gap-4 ${
           isOverdue ? 'bg-rose-50 border-rose-200' : days !== null && days <= 7 ? 'bg-amber-50 border-amber-200' : 'bg-sky-50 border-sky-200'
@@ -597,7 +595,7 @@ export default function StudentFeeDashboard() {
         </div>
       )}
 
-      {/* Fully paid */}
+      {}
       {record.status === 'Paid' && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-700 text-sm">
           <CheckCircle2 size={16} className="flex-shrink-0" />
@@ -605,7 +603,7 @@ export default function StudentFeeDashboard() {
         </div>
       )}
 
-      {/* Fee breakdown */}
+      {}
       {record.feeBreakdown?.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
           <div className="px-5 py-3 border-b border-slate-100 bg-slate-50">
@@ -641,7 +639,7 @@ export default function StudentFeeDashboard() {
         </div>
       )}
 
-      {/* Modals */}
+      {}
       {showPayment && (
         <PaymentModal record={record} onClose={() => setShowPayment(false)} onSuccess={handlePaymentSuccess} />
       )}

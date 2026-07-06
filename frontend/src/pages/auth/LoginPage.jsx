@@ -50,7 +50,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary-950 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
+        {}
         <div className="text-center mb-8 animate-fade-in">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-600 mb-4 shadow-lg shadow-primary-900/50">
             <GraduationCap size={28} className="text-white" />
@@ -59,7 +59,7 @@ export default function LoginPage() {
           <p className="text-slate-400 text-sm mt-1">Sign in to CampusHub ERP</p>
         </div>
 
-        {/* Card */}
+        {}
         <div className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-7 shadow-2xl animate-slide-up ${shake ? 'animate-shake' : ''}`}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

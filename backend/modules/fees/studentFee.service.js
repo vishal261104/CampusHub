@@ -3,7 +3,7 @@ import FeeStructure from "./feeStructure.model.js";
 import SemesterConfig from "../core/semesterConfig.model.js";
 import User from "../users/user.model.js";
 
-// Builds the fee breakdown snapshot from active FeeStructures for a semester+year.
+
 async function buildBreakdown(semester, year) {
     const feeStructures = await FeeStructure.find({ semester, year, isActive: true });
     const breakdown = feeStructures.map((f) => ({
@@ -16,19 +16,25 @@ async function buildBreakdown(semester, year) {
     return { breakdown, totalAmount };
 }
 
-// ─── STUDENT OPERATIONS ───────────────────────────────────────────────────────
 
-// Returns the fee dashboard for the authenticated student for the active semester.
-// Lazily creates a StudentFeeRecord if one doesn't exist yet.
+
+
+
+/**
+ * Generates or retrieves the fee dashboard for a specific student for the currently active semester.
+ * If the student does not have a fee record for the active semester, it calculates their breakdown
+ * based on the active fee structures and automatically creates the record.
+ * @param {String} studentId - The MongoDB ObjectID of the student user
+ */
 export async function getMyFeeDashboard(studentId) {
     const activeSemester = await SemesterConfig.findOne({ isActive: true });
     if (!activeSemester) {
-        return null; // no active semester — student sees "No fees due" state
+        return null; 
     }
 
     const { semester, year, dueDate } = activeSemester;
 
-    // Lazy creation: create record the first time the student views their dashboard
+    
     let record = await StudentFeeRecord.findOne({ studentId, semester, year });
     if (!record) {
         const { breakdown, totalAmount } = await buildBreakdown(semester, year);
@@ -49,10 +55,15 @@ export async function getMyFeeDashboard(studentId) {
     };
 }
 
-// ─── ADMIN OPERATIONS ─────────────────────────────────────────────────────────
 
-// Returns all fee records for the active semester (admin view).
-// Optionally filter by status.
+
+
+
+/**
+ * Retrieves all generated student fee records for the currently active semester.
+ * Can be optionally filtered by payment status ("Pending", "Partial", "Paid").
+ * @param {Object} query - Filtering params
+ */
 export async function getAllRecordsForActiveSemester({ status } = {}) {
     const activeSemester = await SemesterConfig.findOne({ isActive: true });
     if (!activeSemester) return { records: [], activeSemester: null };
@@ -68,8 +79,15 @@ export async function getAllRecordsForActiveSemester({ status } = {}) {
     return { records, activeSemester };
 }
 
-// Admin manually records a payment for a student.
-// paidAmount is the NEW total paid (not an increment) — admin sets the exact amount.
+
+
+/**
+ * Manually updates the paid amount for a student's fee record.
+ * Typically used by admins acknowledging offline payments or correcting balances.
+ * @param {String} recordId - ID of the StudentFeeRecord
+ * @param {String} adminId - ID of the admin making the change
+ * @param {Object} data - Contains paidAmount and paymentNote
+ */
 export async function updatePaidAmount(recordId, adminId, { paidAmount, paymentNote }) {
     const record = await StudentFeeRecord.findById(recordId);
     if (!record) {
@@ -93,13 +111,18 @@ export async function updatePaidAmount(recordId, adminId, { paidAmount, paymentN
     record.paidAmount     = amount;
     record.paymentNote    = paymentNote?.trim() || record.paymentNote;
     record.lastUpdatedBy  = adminId;
-    await record.save(); // pre-save hook auto-computes status
+    await record.save(); 
 
     return record;
 }
 
-// Bulk-creates StudentFeeRecords for ALL students who don't have one yet
-// for the currently active semester. Called manually by admin ("Sync Records" action).
+
+
+/**
+ * Batch-generates fee records for all current students who do not yet have one
+ * for the currently active semester. Used typically right after activating a new semester.
+ * @param {String} adminId - ID of the admin triggering the sync
+ */
 export async function syncRecordsForActiveSemester(adminId) {
     const activeSemester = await SemesterConfig.findOne({ isActive: true });
     if (!activeSemester) {
@@ -111,7 +134,7 @@ export async function syncRecordsForActiveSemester(adminId) {
     const { semester, year, dueDate } = activeSemester;
     const { breakdown, totalAmount } = await buildBreakdown(semester, year);
 
-    // Find all students
+    
     const students = await User.find({ role: "student" }).select("_id");
 
     let created = 0;

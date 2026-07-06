@@ -1,6 +1,6 @@
 import * as userService from "./user.service.js";
 
-// Handles HTTP request to set a user's role by their email address.
+
 export async function setUserRoleByEmail(req, res, next) {
   try {
     const updated = await userService.setRoleByEmail(req.body);

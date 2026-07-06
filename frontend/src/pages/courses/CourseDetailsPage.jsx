@@ -22,9 +22,9 @@ export default function CourseDetailsPage() {
           getCourse(id),
           getCourseCatalog({ courseCode: '' }).catch(() => ({ data: { offerings: [] } })),
         ]);
-        const c = courseRes.data; // The backend returns the course directly, not wrapped in { course: ... }
+        const c = courseRes.data; 
         setCourse(c);
-        // Fetch offerings for this specific course using its code
+        
         const off = await getCourseCatalog({ courseCode: c.courseCode }).catch(() => ({ data: { offerings: [] } }));
         setOfferings(off.data.offerings || []);
       } catch (err) {
@@ -57,7 +57,7 @@ export default function CourseDetailsPage() {
         <ArrowLeft size={16} /> Back to Catalog
       </button>
 
-      {/* Course Header */}
+      {}
       <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
@@ -75,7 +75,7 @@ export default function CourseDetailsPage() {
         <p className="text-slate-600 leading-relaxed">{course.description || 'No description provided.'}</p>
       </div>
 
-      {/* Active Offerings */}
+      {}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
           <GraduationCap size={16} className="text-slate-400" />
@@ -118,7 +118,7 @@ export default function CourseDetailsPage() {
         )}
       </div>
 
-      {/* Placeholders */}
+      {}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-center min-h-[120px] text-slate-400">
           <div className="text-center">

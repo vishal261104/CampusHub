@@ -96,7 +96,7 @@ export default function TimetablePage() {
         </div>
       ) : (
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto">
-          {/* We wrap the table in a div assigned to the ref so the print grabs this entire container */}
+          {}
           <div ref={timetableRef} className="min-w-[800px] p-4 bg-white print:p-0 print:w-full">
             <h2 className="text-xl font-bold text-slate-900 mb-4 hidden print:block">My Weekly Timetable</h2>
             <table className="w-full text-left border-collapse">
@@ -156,7 +156,7 @@ export default function TimetablePage() {
         </div>
       )}
 
-      {/* Course legend */}
+      {}
       {data?.courses?.length > 0 && (
         <div className="card p-4">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Enrolled Courses</p>

@@ -1,6 +1,10 @@
 import * as enrollmentService from "./enrollment.service.js";
 
-// Handles HTTP request for a student to request enrollment in a course offering.
+/**
+ * Controller for a student to initiate an enrollment request for a specific course offering.
+ * Route: POST /api/enrollments/:id/enroll
+ * Access: Student
+ */
 export async function enrollInCourse(req, res, next) {
   try {
     const enrollment = await enrollmentService.enrollInCourse(req.user?.id, req.params.id);
@@ -14,7 +18,11 @@ export async function enrollInCourse(req, res, next) {
   }
 }
 
-// Handles HTTP request for a student to request dropping a course offering.
+/**
+ * Controller for a student to initiate a request to drop an already enrolled course.
+ * Route: POST /api/enrollments/:id/drop
+ * Access: Student
+ */
 export async function dropCourse(req, res, next) {
   try {
     await enrollmentService.dropCourse(req.user?.id, req.params.id);
@@ -25,7 +33,11 @@ export async function dropCourse(req, res, next) {
   }
 }
 
-// Handles HTTP request to retrieve a student's enrollment records.
+/**
+ * Controller for a student to view their own course enrollments, optionally filtered by status, semester, and year.
+ * Route: GET /api/enrollments/my-enrollments
+ * Access: Student
+ */
 export async function getEnrollments(req, res, next) {
   try {
     const result = await enrollmentService.getEnrollments(req.user?.id, req.query);
@@ -36,7 +48,11 @@ export async function getEnrollments(req, res, next) {
   }
 }
 
-// Handles HTTP request to generate a student's weekly timetable.
+/**
+ * Controller for a student to fetch their weekly timetable of enrolled courses.
+ * Route: GET /api/enrollments/timetable
+ * Access: Student
+ */
 export async function getStudentTimetable(req, res, next) {
   try {
     const result = await enrollmentService.getStudentTimetable(req.user?.id, req.query);
@@ -47,7 +63,11 @@ export async function getStudentTimetable(req, res, next) {
   }
 }
 
-// Handles HTTP request for admins to list pending enrollment/drop requests.
+/**
+ * Controller for an admin to view all pending enrollment and drop requests system-wide.
+ * Route: GET /api/enrollments/admin/requests
+ * Access: Admin
+ */
 export async function getAdminRequests(req, res, next) {
   try {
     const result = await enrollmentService.getAdminRequests(req.query);
@@ -57,7 +77,11 @@ export async function getAdminRequests(req, res, next) {
   }
 }
 
-// Handles HTTP request for admins to approve or reject an enrollment/drop request.
+/**
+ * Controller for an admin to approve or reject a pending enrollment/drop request.
+ * Route: PATCH /api/enrollments/admin/requests/:id
+ * Access: Admin
+ */
 export async function updateRequestStatus(req, res, next) {
   try {
     const enrollment = await enrollmentService.updateRequestStatus(req.params.id, req.body.action);
@@ -66,4 +90,4 @@ export async function updateRequestStatus(req, res, next) {
     if (err.status) return res.status(err.status).json({ message: err.message });
     return next(err);
   }
-}
+}

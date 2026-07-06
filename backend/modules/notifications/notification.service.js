@@ -1,17 +1,19 @@
 import Notification from "./notification.model.js";
 import StudentFeeRecord from "../fees/studentFeeRecord.model.js";
 
-// ─── Core CRUD ────────────────────────────────────────────────────────────────
+
+
 
 /**
- * Create a single notification for a user.
+ * Creates a new notification for a specific user.
  */
 export async function createNotification(userId, type, title, body, metadata = {}) {
     return Notification.create({ userId, type, title, body, metadata });
 }
 
+
 /**
- * Get the latest 30 notifications for a user (unread first, then by date).
+ * Fetches recent notifications for a user, sorted by unread status and date.
  */
 export async function getMyNotifications(userId) {
     return Notification.find({ userId })
@@ -20,15 +22,17 @@ export async function getMyNotifications(userId) {
         .lean();
 }
 
+
 /**
- * Mark all notifications as read for a user.
+ * Marks all unread notifications as read for a given user.
  */
 export async function markAllRead(userId) {
     return Notification.updateMany({ userId, isRead: false }, { isRead: true });
 }
 
+
 /**
- * Mark a single notification as read.
+ * Marks a single specific notification as read.
  */
 export async function markOneRead(userId, notificationId) {
     return Notification.findOneAndUpdate(
@@ -38,14 +42,15 @@ export async function markOneRead(userId, notificationId) {
     );
 }
 
+
 /**
- * Count unread notifications for a user.
+ * Returns the count of unread notifications for a user.
  */
 export async function countUnread(userId) {
     return Notification.countDocuments({ userId, isRead: false });
 }
 
-// ─── Due-Fee Scanner (run periodically from index.js) ─────────────────────────
+
 
 function fmtINR(n) {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
@@ -56,22 +61,21 @@ function fmtDate(d) {
     return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+
 /**
- * Scans all active fee records and fires due-date notifications.
- * Called hourly from index.js via setInterval.
- * Avoids duplicates by checking if a notification of the same type
- * was already created for this user within the last 20 hours.
+ * Background job to scan for pending fees and generate due fee notifications.
+ * Runs automatically based on a schedule.
  */
 export async function scanDueFeeNotifications() {
     const now = new Date();
 
-    // We check records whose dueDate falls within the next 8 days (covers 7d and 1d windows)
+    
     const soon = new Date(now);
     soon.setDate(soon.getDate() + 8);
 
     const records = await StudentFeeRecord.find({
         dueDate: { $gte: now, $lte: soon },
-        status: { $in: ["Pending", "Partial"] }, // skip fully paid
+        status: { $in: ["Pending", "Partial"] }, 
     }).populate("studentId", "_id name");
 
     let fired = 0;
@@ -102,7 +106,7 @@ export async function scanDueFeeNotifications() {
 
         if (!type) continue;
 
-        // Dedup: skip if we already sent this type for this user in the last 20 hours
+        
         const cutoff = new Date(now.getTime() - 20 * 60 * 60 * 1000);
         const existing = await Notification.findOne({
             userId,

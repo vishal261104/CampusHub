@@ -32,16 +32,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['Male', 'Female'],
     },
-    // Unique college ID — only for students and faculty
+    
     studentId: {
       type: String,
-      sparse: true,   // allows multiple null (admins/faculty won't have this)
+      sparse: true,   
       unique: true,
       trim: true,
     },
     employeeId: {
       type: String,
-      sparse: true,   // allows multiple null (students/admins won't have this)
+      sparse: true,   
       unique: true,
       trim: true,
     },
@@ -66,7 +66,7 @@ userSchema.methods.comparePassword = async function comparePassword(candidatePas
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Fast lookup by role and department
+
 userSchema.index({ role: 1 });
 userSchema.index({ department: 1 });
 

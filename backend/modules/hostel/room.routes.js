@@ -7,7 +7,7 @@ import {
 
 const router = express.Router();
 
-// All room endpoints are accessible by hostelAdmin only
+
 router.post('/', authMiddleware, authRoles('hostelAdmin'), createRoom);
 router.get('/', authMiddleware, authRoles('hostelAdmin'), getAllRooms);
 router.get('/:id', authMiddleware, authRoles('hostelAdmin'), getRoomById);

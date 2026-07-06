@@ -6,6 +6,10 @@ import { setUserRoleByEmail } from './setUserRoleByEmail.js';
 import { getMe, updateMe ,updatePassword, getAllUsers} from './user.controller.js';
 import { registerStudent, registerFaculty } from '../enrollments/registration.controller.js';
  
+/**
+ * User Routes
+ * Manages user profiles, passwords, role assignments, and basic registration integrations.
+ */
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -18,7 +22,7 @@ router.get('/me', authMiddleware, getMe);
 router.patch('/me', authMiddleware, updateMe);
 router.patch('/me/password', authMiddleware, updatePassword);
 
-// Student/Faculty registration (complete profile after initial signup)
+
 router.post('/register-student', authMiddleware, registerStudent);
 router.post('/register-faculty', authMiddleware, registerFaculty);
 

@@ -123,11 +123,11 @@ export default function HostelRoomsPage() {
     }
   };
 
-  // Derive unique blocks and floors from currently visible rooms
+  
   const uniqueBlocks = [...new Set(rooms.map(r => r.hostelBlock))].sort();
   const uniqueFloors = [...new Set(rooms.map(r => r.floor))].sort((a, b) => a - b);
 
-  // Tab filtering (Boys / Girls / All)
+  
   const tabRooms = activeTab === 'All' ? rooms : rooms.filter(r => r.hostelType === activeTab);
 
   const displayRooms = searchTerm
@@ -138,7 +138,7 @@ export default function HostelRoomsPage() {
       )
     : tabRooms;
 
-  // Stats
+  
   const statsFor = (type) => {
     const subset = type === 'All' ? rooms : rooms.filter(r => r.hostelType === type);
     return {
@@ -163,7 +163,7 @@ export default function HostelRoomsPage() {
 
   return (
     <div className="space-y-5">
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600">
@@ -184,7 +184,7 @@ export default function HostelRoomsPage() {
         </div>
       </div>
 
-      {/* Hostel summary cards */}
+      {}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {[
           { type: 'Boys', stats: boysStats, emoji: '🏠' },
@@ -216,7 +216,7 @@ export default function HostelRoomsPage() {
                   <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Free</p>
                 </div>
               </div>
-              {/* Occupancy bar */}
+              {}
               <div className="mt-3">
                 <div className="w-full h-1.5 bg-white/60 rounded-full overflow-hidden">
                   <div
@@ -233,11 +233,11 @@ export default function HostelRoomsPage() {
         })}
       </div>
 
-      {/* Table card */}
+      {}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        {/* Tabs + filters */}
+        {}
         <div className="border-b border-slate-100">
-          {/* Tabs */}
+          {}
           <div className="flex px-4 pt-2 gap-1 overflow-x-auto">
             {['All', 'Boys', 'Girls'].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)} className={tabStyle(tab)}>
@@ -249,7 +249,7 @@ export default function HostelRoomsPage() {
             ))}
           </div>
 
-          {/* Filters row */}
+          {}
           <div className="px-4 py-3 flex flex-wrap items-center gap-2">
             <div className="relative flex-1 min-w-[180px]">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -281,7 +281,7 @@ export default function HostelRoomsPage() {
           </div>
         </div>
 
-        {/* Table */}
+        {}
         {loading ? (
           <div className="flex justify-center py-16"><Spinner size="lg" /></div>
         ) : displayRooms.length === 0 ? (
@@ -363,7 +363,7 @@ export default function HostelRoomsPage() {
         )}
       </div>
 
-      {/* Create / Edit Modal */}
+      {}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in" onClick={closeModal}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-slide-up" onClick={e => e.stopPropagation()}>
@@ -381,7 +381,7 @@ export default function HostelRoomsPage() {
               </button>
             </div>
             <form onSubmit={handleSave} className="px-6 py-5 space-y-4">
-              {/* Hostel Type toggle */}
+              {}
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-2">Hostel</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -476,7 +476,7 @@ export default function HostelRoomsPage() {
         </div>
       )}
 
-      {/* Occupancy Drawer */}
+      {}
       {occupancy && (
         <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setOccupancy(null)}>
           <div className="bg-white h-full w-full max-w-md shadow-2xl animate-slide-left overflow-y-auto" onClick={e => e.stopPropagation()}>

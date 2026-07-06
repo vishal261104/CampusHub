@@ -78,7 +78,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      {/* Profile Header */}
+      {}
       <div className="card p-6 flex items-center gap-5">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0" style={{ backgroundColor: roleColor }}>
           {user?.name?.charAt(0)?.toUpperCase()}
@@ -103,7 +103,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ID Card — students and faculty */}
+      {}
       {universityId && (
         <div className="card p-5 flex items-center gap-4 border-l-4 border-primary-500">
           <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 flex-shrink-0">
@@ -118,7 +118,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Update Profile */}
+      {}
       <div className="card p-6 space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <User size={16} className="text-primary-600" />
@@ -131,7 +131,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Change Password */}
+      {}
       <div className="card p-6 space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <Key size={16} className="text-primary-600" />
@@ -171,7 +171,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Admin: Set User Role */}
+      {}
       {user?.role === 'admin' && (
         <div className="card p-6 space-y-4">
           <div className="flex items-center gap-2 mb-1">
@@ -212,7 +212,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Show Student ID or Employee ID based on role */}
+          {}
           {roleForm.role === 'student' && (
             <Input
               label="Student ID"

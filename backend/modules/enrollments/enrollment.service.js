@@ -7,18 +7,25 @@ import StudentFeeRecord from "../fees/studentFeeRecord.model.js";
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const VALID_SEMESTERS = ["Spring", "Summer", "Fall", "Winter"];
 
-// Checks if a given value is a valid MongoDB ObjectId.
+
 function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(String(value));
 }
 
-// Converts an HH:MM time string to minutes since midnight.
+
 function timeToMinutes(value) {
   const [hours, minutes] = String(value).split(":").map(Number);
   return hours * 60 + minutes;
 }
 
-// Requests enrollment for a student in a course offering.
+
+/**
+ * Submits a request for a student to enroll in a specific course offering.
+ * Validates semester matching, fee payment status, enrollment periods, and capacity.
+ * Creates a "Pending_Enroll" request that an admin must approve.
+ * @param {String} studentId - ID of the requesting student
+ * @param {String} offeringId - ID of the course offering
+ */
 export async function enrollInCourse(studentId, offeringId) {
   if (!studentId) {
     const err = new Error("Not authorized");
@@ -56,7 +63,7 @@ export async function enrollInCourse(studentId, offeringId) {
     throw err;
   }
 
-  // ─── Fee Constraint Check ───
+  
   const feeRecord = await StudentFeeRecord.findOne({
     studentId,
     semester: activeSemester.semester,
@@ -68,7 +75,7 @@ export async function enrollInCourse(studentId, offeringId) {
     err.status = 403;
     throw err;
   }
-  // ────────────────────────────
+  
 
   const now = new Date();
   if (now < offering.enrollStarts || now > offering.enrollEnds) {
@@ -119,7 +126,13 @@ export async function enrollInCourse(studentId, offeringId) {
   return populated;
 }
 
-// Requests a course drop for a student.
+
+/**
+ * Submits a request for a student to drop an active course enrollment.
+ * Creates a "Pending_Drop" request that an admin must approve.
+ * @param {String} studentId - ID of the requesting student
+ * @param {String} offeringId - ID of the course offering
+ */
 export async function dropCourse(studentId, offeringId) {
   if (!studentId) {
     const err = new Error("Not authorized");
@@ -153,7 +166,13 @@ export async function dropCourse(studentId, offeringId) {
   await enrollment.save();
 }
 
-// Retrieves enrollment records for a student with optional status/semester/year filters.
+
+/**
+ * Retrieves all course enrollments for a specific student.
+ * Supports filtering by status, semester, and year, along with pagination.
+ * @param {String} studentId - ID of the student
+ * @param {Object} query - Filtering params (status, semester, year, page, limit)
+ */
 export async function getEnrollments(studentId, query) {
   if (!studentId) {
     const err = new Error("Not authorized");
@@ -216,7 +235,13 @@ export async function getEnrollments(studentId, query) {
   return { count: filtered.length, page, limit, enrollments: filtered };
 }
 
-// Generates a weekly class timetable and detects schedule conflicts for a student.
+
+/**
+ * Generates a weekly timetable for a student based on their active "Enrolled" courses.
+ * Groups classes by day of the week, sorts them by time, and detects scheduling conflicts.
+ * @param {String} studentId - ID of the student
+ * @param {Object} query - Filtering params (semester, year)
+ */
 export async function getStudentTimetable(studentId, query) {
   if (!studentId) {
     const err = new Error("Not authorized");
@@ -323,7 +348,13 @@ export async function getStudentTimetable(studentId, query) {
   };
 }
 
-// Retrieves all pending enrollment and drop requests with timetable clash detection.
+
+/**
+ * Retrieves all pending enrollment and drop requests for admins to review.
+ * Automatically detects and flags scheduling conflicts (time clashes) between the
+ * requested course and the student's already approved active enrollments.
+ * @param {Object} query - Filtering params (status)
+ */
 export async function getAdminRequests(query) {
   let statusFilter = { $in: ["Pending_Enroll", "Pending_Drop"] };
   if (query.status) {
@@ -383,7 +414,13 @@ export async function getAdminRequests(query) {
   return result;
 }
 
-// Approves or rejects an enrollment/drop request, updating enrolledCount accordingly.
+
+/**
+ * Processes an admin's decision (approve or reject) on a pending enrollment or drop request.
+ * Adjusts the course offering's `enrolledCount` automatically upon approval.
+ * @param {String} enrollmentId - ID of the enrollment request document
+ * @param {String} action - The decision ("approve" or "reject")
+ */
 export async function updateRequestStatus(enrollmentId, action) {
   const enrollment = await Enrollment.findById(enrollmentId).populate("courseOfferingId");
   if (!enrollment) {

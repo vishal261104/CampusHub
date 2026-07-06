@@ -1,12 +1,12 @@
 import HostelRoom from "./hostelRoom.model.js";
 import RoomAllocation from "./roomAllocation.model.js";
 
-// Allocates a room to a student upon application approval.
-// If the application has a preferred roomNumber, tries that room first.
-// Otherwise auto-assigns the first available room in the matching hostel,
-// ordered by floor → block → roomNumber, matching the requested roomCategory.
+
+
+
+
 export async function allocateRoom({ studentId, applicationId, hostelType, roomCategory, preferredRoomNumber }) {
-  // Constraint: one student → one active room
+  
   const existingAlloc = await RoomAllocation.findOne({ studentId, isActive: true });
   if (existingAlloc) {
     const err = new Error("Student already has an active room allocation. Deallocate first.");
@@ -14,13 +14,13 @@ export async function allocateRoom({ studentId, applicationId, hostelType, roomC
     throw err;
   }
 
-  // Map roomCategory to roomType (application uses "Quad", rooms use "Suite" for 4 capacity)
+  
   const roomTypeMap = { Single: "Single", Double: "Double", Triple: "Triple", Quad: "Suite" };
   const targetRoomType = roomTypeMap[roomCategory] || roomCategory;
 
   let room = null;
 
-  // 1) Try preferred room if specified
+  
   if (preferredRoomNumber) {
     room = await HostelRoom.findOne({
       roomNumber: preferredRoomNumber,
@@ -31,7 +31,7 @@ export async function allocateRoom({ studentId, applicationId, hostelType, roomC
     });
   }
 
-  // 2) Auto-assign: find first available room matching hostelType + roomType, ordered floor → block → roomNumber
+  
   if (!room) {
     room = await HostelRoom.findOne({
       hostelType,
@@ -47,7 +47,7 @@ export async function allocateRoom({ studentId, applicationId, hostelType, roomC
     throw err;
   }
 
-  // Atomic increment to prevent race conditions
+  
   const updated = await HostelRoom.findOneAndUpdate(
     {
       _id: room._id,
@@ -73,7 +73,7 @@ export async function allocateRoom({ studentId, applicationId, hostelType, roomC
   return { allocation, room: updated };
 }
 
-// Deallocates a student from their room (used when cancelling an approved application).
+
 export async function deallocateByApplication(applicationId) {
   const allocation = await RoomAllocation.findOne({ applicationId, isActive: true });
   if (!allocation) return null;
@@ -89,13 +89,13 @@ export async function deallocateByApplication(applicationId) {
   return allocation;
 }
 
-// Gets the active allocation for a student.
+
 export async function getStudentAllocation(studentId) {
   return RoomAllocation.findOne({ studentId, isActive: true })
     .populate("roomId", "roomNumber hostelType hostelBlock roomType floor capacity currentOccupancy");
 }
 
-// Gets all active allocations for a room.
+
 export async function getRoomAllocations(roomId) {
   return RoomAllocation.find({ roomId, isActive: true })
     .populate("studentId", "name email studentId gender");

@@ -2,7 +2,11 @@ import HostelApplication from "./hostelApplication.model.js";
 import * as roomService from "./hostelRoom.service.js";
 import * as allocationService from "./roomAllocation.service.js";
 
-// Handles HTTP request to create a new hostel room.
+/**
+ * Controller to create a new physical room in a hostel.
+ * Route: POST /api/hostels/rooms/
+ * Access: Admin
+ */
 export const createRoom = async (req, res, next) => {
   try {
     const room = await roomService.createRoom(req.body);
@@ -13,7 +17,11 @@ export const createRoom = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request to retrieve all active rooms based on query filters.
+/**
+ * Controller to list all active rooms. Supports filtering by block, type, or availability.
+ * Route: GET /api/hostels/rooms/
+ * Access: Admin
+ */
 export const getAllRooms = async (req, res, next) => {
   try {
     const rooms = await roomService.getAllRooms(req.query);
@@ -23,7 +31,11 @@ export const getAllRooms = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request to retrieve details of a single hostel room by ID.
+/**
+ * Controller to fetch details of a specific room by its ID.
+ * Route: GET /api/hostels/rooms/:id
+ * Access: Admin
+ */
 export const getRoomById = async (req, res, next) => {
   try {
     const room = await roomService.getRoomById(req.params.id);
@@ -34,7 +46,11 @@ export const getRoomById = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request to update an existing hostel room.
+/**
+ * Controller to update room properties like type or capacity.
+ * Route: PUT /api/hostels/rooms/:id
+ * Access: Admin
+ */
 export const updateRoom = async (req, res, next) => {
   try {
     const room = await roomService.updateRoom(req.params.id, req.body);
@@ -45,7 +61,11 @@ export const updateRoom = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request to soft-delete a hostel room.
+/**
+ * Controller to logically delete (deactivate) a room. Cannot delete if occupied.
+ * Route: DELETE /api/hostels/rooms/:id
+ * Access: Admin
+ */
 export const deleteRoom = async (req, res, next) => {
   try {
     await roomService.deleteRoom(req.params.id);
@@ -56,7 +76,11 @@ export const deleteRoom = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request to view currently allocated occupants of a room.
+/**
+ * Controller to fetch detailed occupancy data for a specific room, including a list of students.
+ * Route: GET /api/hostels/rooms/:id/occupancy
+ * Access: Admin
+ */
 export const getRoomOccupancy = async (req, res, next) => {
   try {
     const room = await roomService.getRoomById(req.params.id);
@@ -73,8 +97,15 @@ export const getRoomOccupancy = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request for a student to submit a new hostel application.
-// roomNumber is optional — if omitted, a room will be auto-assigned on approval.
+
+// ─── HOSTEL APPLICATIONS ────────────────────────────────────────────────────────
+
+/**
+ * Controller for a student to apply for a hostel room.
+ * Generates an application number and enforces gender-specific hostel assignment.
+ * Route: POST /api/hostels/
+ * Access: Student
+ */
 export const applyForHostel = async (req, res, next) => {
   try {
     const userDoc = req.userDoc;
@@ -134,7 +165,11 @@ export const applyForHostel = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request for a student to view their own latest application.
+/**
+ * Controller for a student to check their current active hostel application and allocation.
+ * Route: GET /api/hostels/my-application
+ * Access: Student
+ */
 export const getMyApplication = async (req, res, next) => {
   try {
     const application = await HostelApplication.findOne({ studentId: req.userDoc._id })
@@ -144,7 +179,7 @@ export const getMyApplication = async (req, res, next) => {
       return res.status(404).json({ message: 'No application found' });
     }
 
-    // If approved, attach allocation info
+    
     let allocation = null;
     if (application.status === 'Approved') {
       allocation = await allocationService.getStudentAllocation(req.userDoc._id);
@@ -156,7 +191,11 @@ export const getMyApplication = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request for a student to cancel their pending hostel application.
+/**
+ * Controller for a student to cancel a 'Pending' application.
+ * Route: PATCH /api/hostels/:id/cancel
+ * Access: Student
+ */
 export const cancelApplication = async (req, res, next) => {
   try {
     const applicationId = req.params.id;
@@ -185,7 +224,11 @@ export const cancelApplication = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request for admins to list all hostel applications, optionally filtered by status.
+/**
+ * Controller for admins to list all hostel applications, with optional status filtering.
+ * Route: GET /api/hostels/
+ * Access: Admin
+ */
 export const getAllApplications = async (req, res, next) => {
   try {
     const { status } = req.query;
@@ -209,9 +252,12 @@ export const getAllApplications = async (req, res, next) => {
   }
 };
 
-// Handles HTTP request for admins to approve or reject a pending hostel application.
-// On approval: allocates a room (preferred or auto-assigned) and increments occupancy.
-// On rejection: simply updates the status.
+/**
+ * Controller for admins to approve or reject a hostel application.
+ * Approval automatically triggers room allocation logic.
+ * Route: PATCH /api/hostels/:id/status
+ * Access: Admin
+ */
 export const updateApplicationStatus = async (req, res, next) => {
   try {
     const applicationId = req.params.id;
@@ -234,7 +280,7 @@ export const updateApplicationStatus = async (req, res, next) => {
     }
 
     if (status === 'Approved') {
-      // Allocate room — throws if no room available or student already allocated
+      
       const { allocation, room } = await allocationService.allocateRoom({
         studentId: application.studentId,
         applicationId: application._id,
@@ -244,7 +290,7 @@ export const updateApplicationStatus = async (req, res, next) => {
       });
 
       application.status = 'Approved';
-      // Store the actually allocated room number on the application for reference
+      
       application.roomNumber = room.roomNumber;
       await application.save();
 
@@ -256,7 +302,7 @@ export const updateApplicationStatus = async (req, res, next) => {
       });
     }
 
-    // Rejection
+    
     application.status = 'Rejected';
     await application.save();
 
@@ -265,4 +311,4 @@ export const updateApplicationStatus = async (req, res, next) => {
     if (err.status) return res.status(err.status).json({ message: err.message });
     next(err);
   }
-};
+};

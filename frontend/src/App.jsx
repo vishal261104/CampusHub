@@ -25,6 +25,8 @@ import AdminOutingPage from './pages/hostel/AdminOutingPage';
 import StudentRegistrationPage from './pages/auth/StudentRegistrationPage';
 import EnrollmentAdminPage from './pages/enrollment/EnrollmentAdminPage';
 import NotFoundPage from './pages/NotFoundPage';
+import TransportAdminPage from './pages/transport/TransportAdminPage';
+import TransportStudentPage from './pages/transport/TransportStudentPage';
 
 import UserManagementPage from './pages/admin/UserManagementPage';
 import FeeStructurePage from './pages/fees/FeeStructurePage';
@@ -77,6 +79,8 @@ function AppRoutes() {
         <Route path="fees/receipt/:paymentId" element={<RequireAuth roles={['student']}><ReceiptPage /></RequireAuth>} />
         <Route path="users/manage" element={<RequireAuth roles={['admin']}><UserManagementPage /></RequireAuth>} />
         <Route path="register-student" element={<RequireAuth roles={['student']}><StudentRegistrationPage /></RequireAuth>} />
+        <Route path="transport" element={<RequireAuth roles={['student']}><TransportStudentPage /></RequireAuth>} />
+        <Route path="transport/admin" element={<RequireAuth roles={['admin']}><TransportAdminPage /></RequireAuth>} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />

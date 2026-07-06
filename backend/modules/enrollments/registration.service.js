@@ -10,7 +10,13 @@ const BRANCH_CODES = {
   'Information Technology': 'IT',
 };
 
-// Completes student registration by generating a unique student ID based on year and branch.
+
+/**
+ * Completes the registration profile for a newly signed-up student.
+ * Auto-generates a unique Student ID based on the enrollment year, branch, and an incrementing sequence.
+ * @param {String} userId - ID of the user document
+ * @param {Object} data - Contains year, branch, and gender
+ */
 export async function registerStudent(userId, { year, branch, gender }) {
   const user = await User.findById(userId);
   if (!user) {
@@ -73,7 +79,13 @@ export async function registerStudent(userId, { year, branch, gender }) {
   };
 }
 
-// Completes faculty registration by generating a unique employee ID.
+
+/**
+ * Completes the registration profile for a newly signed-up faculty member.
+ * Auto-generates a unique Employee ID (e.g., FAC001) using an incrementing sequence.
+ * @param {String} userId - ID of the user document
+ * @param {Object} data - Contains gender
+ */
 export async function registerFaculty(userId, { gender }) {
   const user = await User.findById(userId);
   if (!user) {

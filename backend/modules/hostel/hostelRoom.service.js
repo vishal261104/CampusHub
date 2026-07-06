@@ -1,6 +1,6 @@
 import HostelRoom from "./hostelRoom.model.js";
 
-// Creates a new hostel room after validating uniqueness and capacity.
+
 export async function createRoom({ roomNumber, hostelType, hostelBlock, roomType, capacity, floor }) {
   const cap = parseInt(capacity, 10);
   if (!Number.isInteger(cap) || cap <= 0) {
@@ -32,7 +32,7 @@ export async function createRoom({ roomNumber, hostelType, hostelBlock, roomType
   return room;
 }
 
-// Retrieves all active hostel rooms, optionally filtered by hostelType, block, type, floor, or availability.
+
 export async function getAllRooms(query = {}) {
   const filter = { isActive: true };
 
@@ -57,7 +57,7 @@ export async function getAllRooms(query = {}) {
   return rooms;
 }
 
-// Retrieves a single active hostel room by its database ID.
+
 export async function getRoomById(roomId) {
   const room = await HostelRoom.findOne({ _id: roomId, isActive: true });
   if (!room) {
@@ -68,7 +68,7 @@ export async function getRoomById(roomId) {
   return room;
 }
 
-// Updates details of an active hostel room, validating capacity adjustments.
+
 export async function updateRoom(roomId, updates) {
   const room = await HostelRoom.findOne({ _id: roomId, isActive: true });
   if (!room) {
@@ -111,7 +111,7 @@ export async function updateRoom(roomId, updates) {
   return room;
 }
 
-// Deactivates/soft-deletes a hostel room if it has no current occupants.
+
 export async function deleteRoom(roomId) {
   const room = await HostelRoom.findOne({ _id: roomId, isActive: true });
   if (!room) {

@@ -14,7 +14,7 @@ import {
   CalendarDays, Zap, ZapOff, Users, CheckCircle2, Clock, AlertTriangle, RotateCw
 } from 'lucide-react';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+
 const CATEGORIES = ['Tuition Fee', 'Hostel Fee', 'Exam Fee', 'Library Fee', 'Other'];
 const SEMESTERS  = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -53,7 +53,7 @@ function autoLabel(category, semester, year) {
   return `${category} – ${semester} ${year}`;
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+
 function CategoryBadge({ category }) {
   const meta = CATEGORY_META[category] || CATEGORY_META['Other'];
   const Icon = meta.icon;
@@ -64,7 +64,7 @@ function SemBadge({ semester }) {
   return <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${cls}`}>{semester}</span>;
 }
 
-// ─── Active Semester Panel ────────────────────────────────────────────────────
+
 function ActiveSemesterPanel({ active, onActivate, onDeactivate, onUpdateDue, loading }) {
   const [showModal, setShowModal] = useState(false);
   const [showDueDateModal, setShowDueDateModal] = useState(false);
@@ -132,7 +132,7 @@ function ActiveSemesterPanel({ active, onActivate, onDeactivate, onUpdateDue, lo
         </div>
       </div>
 
-      {/* Activate Modal */}
+      {}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowModal(false)}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
@@ -171,7 +171,7 @@ function ActiveSemesterPanel({ active, onActivate, onDeactivate, onUpdateDue, lo
         </div>
       )}
 
-      {/* Update Due Date Modal */}
+      {}
       {showDueDateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowDueDateModal(false)}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs mx-4" onClick={e => e.stopPropagation()}>
@@ -195,13 +195,13 @@ function ActiveSemesterPanel({ active, onActivate, onDeactivate, onUpdateDue, lo
   );
 }
 
-// ─── Student Records Tab ──────────────────────────────────────────────────────
+
 function StudentRecordsTab({ active }) {
   const [records, setRecords]       = useState([]);
   const [loading, setLoading]       = useState(true);
   const [syncing, setSyncing]       = useState(false);
   const [statusFilter, setStatus]   = useState('');
-  const [editModal, setEditModal]   = useState(null); // { record }
+  const [editModal, setEditModal]   = useState(null); 
   const [newPaid, setNewPaid]       = useState('');
   const [payNote, setPayNote]       = useState('');
   const [saving, setSaving]         = useState(false);
@@ -258,7 +258,7 @@ function StudentRecordsTab({ active }) {
 
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
+      {}
       <div className="flex items-center gap-2 flex-wrap">
         {['', 'Pending', 'Partial', 'Paid'].map(s => (
           <button key={s || 'all'} onClick={() => setStatus(s)}
@@ -316,7 +316,7 @@ function StudentRecordsTab({ active }) {
         </div>
       )}
 
-      {/* Edit payment modal */}
+      {}
       {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setEditModal(null)}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
@@ -354,7 +354,7 @@ function StudentRecordsTab({ active }) {
   );
 }
 
-// ─── Fee Form Modal ───────────────────────────────────────────────────────────
+
 function FeeFormModal({ mode, initial, onClose, onSaved }) {
   const [form, setForm] = useState(initial || EMPTY_FORM);
   const [saving, setSaving] = useState(false);
@@ -450,12 +450,12 @@ function FeeFormModal({ mode, initial, onClose, onSaved }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+
 export default function FeeStructurePage() {
-  const [tab, setTab]             = useState('structures'); // 'structures' | 'records'
+  const [tab, setTab]             = useState('structures'); 
   const [fees, setFees]           = useState([]);
   const [years, setYears]         = useState([]);
-  const [active, setActive]       = useState(null);       // active SemesterConfig
+  const [active, setActive]       = useState(null);       
   const [loading, setLoading]     = useState(true);
   const [modal, setModal]         = useState(null);
   const [archiving, setArchiving] = useState(null);
@@ -549,7 +549,7 @@ export default function FeeStructurePage() {
 
   return (
     <div className="space-y-5">
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600"><IndianRupee size={20} /></div>
@@ -570,10 +570,10 @@ export default function FeeStructurePage() {
         </div>
       </div>
 
-      {/* Active Semester Panel */}
+      {}
       <ActiveSemesterPanel active={active} onActivate={handleActivate} onDeactivate={handleDeactivate} onUpdateDue={handleUpdateDue} loading={loading} />
 
-      {/* Stats */}
+      {}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl px-5 py-4">
           <p className="text-2xl font-bold">{activeCount}</p>
@@ -589,7 +589,7 @@ export default function FeeStructurePage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {}
       <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
         {[['structures', 'Fee Structures'], ['records', 'Student Records']].map(([id, lbl]) => (
           <button key={id} onClick={() => setTab(id)}
@@ -605,7 +605,7 @@ export default function FeeStructurePage() {
         <StudentRecordsTab active={active} />
       ) : (
         <>
-          {/* Filters */}
+          {}
           <div className="flex flex-wrap gap-2 items-center">
             <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
               {[['true', 'Active'], ['false', 'Archived'], ['all', 'All']].map(([val, lbl]) => (
@@ -645,7 +645,7 @@ export default function FeeStructurePage() {
             )}
           </div>
 
-          {/* Fee cards */}
+          {}
           {loading ? (
             <div className="flex justify-center py-16"><Spinner size="lg" /></div>
           ) : fees.length === 0 ? (

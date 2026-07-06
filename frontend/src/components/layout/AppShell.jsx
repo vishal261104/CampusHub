@@ -22,12 +22,12 @@ export default function AppShell() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#fafafa]">
-      {/* Desktop sidebar */}
+      {}
       <div className="hidden lg:flex lg:flex-shrink-0">
         <Sidebar />
       </div>
 
-      {/* Mobile sidebar overlay */}
+      {}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
@@ -37,7 +37,7 @@ export default function AppShell() {
         </div>
       )}
 
-      {/* Main content */}
+      {}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Topbar onMenuClick={() => setSidebarOpen(true)} title={title} />
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">

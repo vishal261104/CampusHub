@@ -1,6 +1,10 @@
 import * as courseService from "./course.service.js";
 
-// Handles HTTP request to create a new course.
+/**
+ * Controller to create a new base course in the catalog.
+ * Route: POST /api/courses/course
+ * Access: Admin
+ */
 export async function createCourse(req, res, next) {
   try {
     const course = await courseService.createCourse(req.body);
@@ -11,7 +15,11 @@ export async function createCourse(req, res, next) {
   }
 }
 
-// Handles HTTP request to retrieve a specific course by ID.
+/**
+ * Controller to fetch details of a specific base course by ID.
+ * Route: GET /api/courses/course/:id
+ * Access: Authenticated Users
+ */
 export async function getCourse(req, res, next) {
   try {
     const course = await courseService.getCourse(req.params.id);
@@ -22,7 +30,11 @@ export async function getCourse(req, res, next) {
   }
 }
 
-// Handles HTTP request to update an existing course.
+/**
+ * Controller to update a base course's details (e.g. credits, description).
+ * Route: PUT /api/courses/course/:id
+ * Access: Admin
+ */
 export async function updateCourse(req, res, next) {
   try {
     const updated = await courseService.updateCourse(req.params.id, req.body);
@@ -33,7 +45,11 @@ export async function updateCourse(req, res, next) {
   }
 }
 
-// Handles HTTP request to delete a course.
+/**
+ * Controller to delete a base course from the catalog.
+ * Route: DELETE /api/courses/course/:id
+ * Access: Admin
+ */
 export async function deleteCourse(req, res, next) {
   try {
     await courseService.deleteCourse(req.params.id);
@@ -44,7 +60,11 @@ export async function deleteCourse(req, res, next) {
   }
 }
 
-// Handles HTTP request to retrieve a paginated list of courses.
+/**
+ * Controller to fetch all base courses, with optional pagination and search filters.
+ * Route: GET /api/courses/catalog
+ * Access: Authenticated Users
+ */
 export async function getAllCourses(req, res, next) {
   try {
     const result = await courseService.getAllCourses(req.query);

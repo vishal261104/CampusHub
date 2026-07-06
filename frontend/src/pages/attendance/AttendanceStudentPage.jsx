@@ -47,7 +47,7 @@ export default function AttendanceStudentPage() {
         <p className="text-slate-500 text-sm">Track your attendance across all enrolled courses</p>
       </div>
 
-      {/* Summary */}
+      {}
       {!loading && attendance.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="stat-card">

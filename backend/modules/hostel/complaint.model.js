@@ -53,13 +53,13 @@ const complaintSchema = new mongoose.Schema({
     comments: [commentSchema],
 }, { timestamps: true });
 
-// studentId — students fetching their own complaints
+
 complaintSchema.index({ studentId: 1 });
-// status — admin filtering the open/in-progress queue
+
 complaintSchema.index({ status: 1 });
-// compound — admin filtering maintenance queue by type + status
+
 complaintSchema.index({ category: 1, status: 1 });
-// roomId — admin viewing all complaints for a specific room
+
 complaintSchema.index({ roomId: 1 });
 
 export default mongoose.model("Complaint", complaintSchema);

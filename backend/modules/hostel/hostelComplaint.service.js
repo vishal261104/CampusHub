@@ -1,8 +1,8 @@
 import Complaint from "./complaint.model.js";
 import RoomAllocation from "./roomAllocation.model.js";
 
-// Creates a complaint for a student, deriving their roomId from their active allocation.
-// Rejects if the student has no active room allocation.
+
+
 export async function createComplaint(studentId, { title, description, category, priority }) {
     const allocation = await RoomAllocation.findOne({ studentId, isActive: true });
     if (!allocation) {
@@ -23,14 +23,14 @@ export async function createComplaint(studentId, { title, description, category,
     return complaint;
 }
 
-// Returns all complaints raised by a specific student, newest first.
+
 export async function getMyComplaints(studentId) {
     return Complaint.find({ studentId })
         .populate("roomId", "roomNumber hostelBlock hostelType floor")
         .sort({ createdAt: -1 });
 }
 
-// Returns all complaints for admin with optional filters: status, category, priority, roomId.
+
 export async function getAllComplaints(query = {}) {
     const filter = {};
     if (query.status)   filter.status   = query.status;
@@ -44,9 +44,9 @@ export async function getAllComplaints(query = {}) {
         .sort({ createdAt: -1 });
 }
 
-// Updates the status of a complaint with role-based rules:
-// - hostelAdmin can set: Open → In Progress (never Resolved).
-// - student can set: In Progress → Resolved (own complaints only).
+
+
+
 export async function updateComplaintStatus(complaintId, status, callerRole, callerId) {
     const adminAllowed   = ["Open", "In Progress"];
     const studentAllowed = ["Resolved"];
@@ -69,14 +69,14 @@ export async function updateComplaintStatus(complaintId, status, callerRole, cal
         throw err;
     }
 
-    // IDOR: students can only resolve their own complaints
+    
     if (callerRole === "student" && complaint.studentId.toString() !== callerId.toString()) {
         const err = new Error("You can only resolve your own complaints");
         err.status = 403;
         throw err;
     }
 
-    // Students can only resolve a complaint that is In Progress (admin has looked at it)
+    
     if (callerRole === "student" && complaint.status !== "In Progress") {
         const err = new Error("You can only resolve a complaint that is In Progress");
         err.status = 400;
@@ -95,7 +95,7 @@ export async function updateComplaintStatus(complaintId, status, callerRole, cal
     return complaint;
 }
 
-// Sets or clears the assignedTo field for a complaint.
+
 export async function assignComplaint(complaintId, assignedTo) {
     const complaint = await Complaint.findById(complaintId);
     if (!complaint) {
@@ -108,8 +108,8 @@ export async function assignComplaint(complaintId, assignedTo) {
     return complaint;
 }
 
-// Appends a comment to a complaint from either a student or hostelAdmin.
-// Students can only comment on their own complaints (ownership checked in controller).
+
+
 export async function addComment(complaintId, authorId, authorRole, text) {
     const complaint = await Complaint.findById(complaintId)
         .populate("comments.authorId", "name role");

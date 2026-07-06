@@ -1,6 +1,11 @@
 import * as offeringService from './courseOffering.service.js';
 
-// Handles HTTP request to retrieve course catalog entries.
+/**
+ * Controller to fetch the full catalog of available course offerings.
+ * Supports filtering by semester, year, status, courseCode, and a search string.
+ * Route: GET /api/courses/course-catalog
+ * Access: Authenticated Users
+ */
 export async function getCourseCatalog(req, res, next) {
   try {
     const result = await offeringService.getCourseCatalog(req.query);
@@ -11,7 +16,12 @@ export async function getCourseCatalog(req, res, next) {
   }
 }
 
-// Handles HTTP request to create a new course offering.
+/**
+ * Controller to create a new course offering for a specific term and year.
+ * Prevents duplicates (same course, semester, year, and section).
+ * Route: POST /api/courses/course-offering
+ * Access: Admin
+ */
 export async function createCourseOffering(req, res, next) {
   try {
     const offering = await offeringService.createOffering(req.body);
@@ -25,7 +35,12 @@ export async function createCourseOffering(req, res, next) {
   }
 }
 
-// Handles HTTP request to update a course offering.
+/**
+ * Controller to update an existing course offering.
+ * Used for changing capacity, enroll dates, or assigned faculty.
+ * Route: PUT /api/courses/course-offering/:id
+ * Access: Admin
+ */
 export async function updateOffering(req, res, next) {
   try {
     const updated = await offeringService.updateOffering(req.params.id, req.body);
@@ -39,7 +54,11 @@ export async function updateOffering(req, res, next) {
   }
 }
 
-// Handles HTTP request to delete a course offering.
+/**
+ * Controller to permanently delete a course offering.
+ * Route: DELETE /api/courses/course-offering/:id
+ * Access: Admin
+ */
 export async function deleteOffering(req, res, next) {
   try {
     await offeringService.deleteOffering(req.params.id);
@@ -50,7 +69,12 @@ export async function deleteOffering(req, res, next) {
   }
 }
 
-// Handles HTTP request to list course offerings with filters.
+/**
+ * Controller to list active course offerings.
+ * If accessed by faculty, automatically filters to show only the courses they are teaching.
+ * Route: GET /api/courses/course-offerings
+ * Access: Admin, Faculty
+ */
 export async function listOfferings(req, res, next) {
   try {
     const result = await offeringService.listOfferings(req.query, req.user?.role, req.user?.id);
@@ -61,7 +85,11 @@ export async function listOfferings(req, res, next) {
   }
 }
 
-// Handles HTTP request to retrieve a single course offering by ID.
+/**
+ * Controller to fetch detailed information about a single course offering by its ID.
+ * Route: GET /api/courses/course-offering/:id
+ * Access: Authenticated Users
+ */
 export async function getOffering(req, res, next) {
   try {
     const offering = await offeringService.getOffering(req.params.id);
@@ -72,7 +100,11 @@ export async function getOffering(req, res, next) {
   }
 }
 
-// Handles HTTP request to assign faculty to a course offering.
+/**
+ * Controller to explicitly assign or change the faculty member for a course offering.
+ * Route: PATCH /api/courses/course-offering/:id/faculty
+ * Access: Admin
+ */
 export async function assignFacultyToOffering(req, res, next) {
   try {
     const { alreadyAssigned, offering } = await offeringService.assignFaculty(req.params.id, req.body);

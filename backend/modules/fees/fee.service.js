@@ -1,6 +1,6 @@
 import FeeStructure, { FEE_CATEGORIES_LIST, FEE_SEMESTERS_LIST } from "./feeStructure.model.js";
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+
 
 function validateCategory(category) {
     if (!FEE_CATEGORIES_LIST.includes(category)) {
@@ -52,9 +52,14 @@ async function assertNoDuplicate(category, year, semester, excludeId = null) {
     }
 }
 
-// ─── SERVICE FUNCTIONS ────────────────────────────────────────────────────────
 
-// Creates a new fee structure. Rejects if an identical category+year+semester already exists.
+
+
+/**
+ * Creates a new base fee structure (e.g. Tuition Fee, Library Fee) for a specific term.
+ * @param {String} adminId - ID of the admin creating this structure
+ * @param {Object} data - Contains category, label, amount, year, semester, description
+ */
 export async function createFeeStructure(adminId, { category, label, amount, year, semester, description }) {
     if (!label?.trim()) {
         const err = new Error("label is required");
@@ -80,15 +85,19 @@ export async function createFeeStructure(adminId, { category, label, amount, yea
     });
 }
 
-// Returns fee structures with optional filters. Defaults to active only.
+
+/**
+ * Retrieves all fee structures matching the specified filters.
+ * @param {Object} query - Filtering params (year, semester, category, isActive)
+ */
 export async function getAllFeeStructures({ year, semester, category, isActive } = {}) {
     const filter = {};
 
-    // Default to active only; pass isActive=all to include archived, isActive=false for archived only
+    
     if (isActive === "false" || isActive === false) {
         filter.isActive = false;
     } else if (isActive === "all") {
-        // no filter — include both
+        
     } else {
         filter.isActive = true;
     }
@@ -102,7 +111,11 @@ export async function getAllFeeStructures({ year, semester, category, isActive }
         .sort({ year: -1, semester: 1, category: 1 });
 }
 
-// Returns a single fee structure by ID.
+
+/**
+ * Fetches a single fee structure by ID.
+ * @param {String} id - Fee structure ID
+ */
 export async function getFeeStructureById(id) {
     const fee = await FeeStructure.findById(id).populate("createdBy", "name email");
     if (!fee) {
@@ -113,7 +126,13 @@ export async function getFeeStructureById(id) {
     return fee;
 }
 
-// Updates an existing fee structure. Re-validates uniqueness only if key fields change.
+
+/**
+ * Updates an active fee structure.
+ * Prevents editing if the structure has been archived.
+ * @param {String} id - Fee structure ID
+ * @param {Object} data - Fields to update
+ */
 export async function updateFeeStructure(id, { category, label, amount, year, semester, description }) {
     const fee = await FeeStructure.findById(id);
     if (!fee) {
@@ -127,7 +146,7 @@ export async function updateFeeStructure(id, { category, label, amount, year, se
         throw err;
     }
 
-    // Resolve new values (fall back to existing if not provided)
+    
     const newCategory    = category    || fee.category;
     const newSemester    = semester    || fee.semester;
     const newYear        = year        !== undefined ? validateYear(year)     : fee.year;
@@ -138,7 +157,7 @@ export async function updateFeeStructure(id, { category, label, amount, year, se
     if (category) validateCategory(newCategory);
     if (semester) validateSemester(newSemester);
 
-    // Only re-check uniqueness if the identifying tuple has changed
+    
     const tupleChanged =
         newCategory  !== fee.category  ||
         newYear      !== fee.year      ||
@@ -159,7 +178,11 @@ export async function updateFeeStructure(id, { category, label, amount, year, se
     return fee;
 }
 
-// Soft-deletes a fee structure by setting isActive = false.
+
+/**
+ * Archies a fee structure so it is no longer applied to new active semester syncs.
+ * @param {String} id - Fee structure ID
+ */
 export async function archiveFeeStructure(id) {
     const fee = await FeeStructure.findById(id);
     if (!fee) {
@@ -177,7 +200,11 @@ export async function archiveFeeStructure(id) {
     return fee;
 }
 
-// Restores an archived fee structure (re-checks uniqueness before restoring).
+
+/**
+ * Restores an archived fee structure back to active status.
+ * @param {String} id - Fee structure ID
+ */
 export async function restoreFeeStructure(id) {
     const fee = await FeeStructure.findById(id);
     if (!fee) {
@@ -196,7 +223,10 @@ export async function restoreFeeStructure(id) {
     return fee;
 }
 
-// Returns a sorted list of distinct years present in the collection (newest first).
+
+/**
+ * Gets a distinct list of all years that have fee structures defined.
+ */
 export async function getDistinctYears() {
     const years = await FeeStructure.distinct("year");
     return years.sort((a, b) => b - a);

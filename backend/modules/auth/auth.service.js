@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../users/user.model.js";
 
-// Generates a JSON Web Token (JWT) for a given user.
+
 function signToken(user) {
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
@@ -19,7 +19,7 @@ function signToken(user) {
   );
 }
 
-// Formats a user document into a safe public object (excludes password).
+
 function formatUser(user) {
   return {
     id: user._id,
@@ -32,7 +32,7 @@ function formatUser(user) {
   };
 }
 
-// Validates input, checks for duplicate email, creates a user, and returns a token + profile.
+
 export async function register({ name, email, password }) {
   if (!name || !email || !password) {
     const err = new Error("name, email, password are required");
@@ -52,7 +52,7 @@ export async function register({ name, email, password }) {
   return { token, user: formatUser(user) };
 }
 
-// Validates credentials and returns a token + profile.
+
 export async function login({ email, password }) {
   if (!email || !password) {
     const err = new Error("email and password are required");

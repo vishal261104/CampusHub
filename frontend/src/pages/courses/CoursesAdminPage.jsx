@@ -158,7 +158,7 @@ export default function CoursesAdminPage() {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
+      {}
       <Modal
         open={modal === 'create' || modal === 'edit'}
         onClose={() => setModal(null)}
@@ -185,7 +185,7 @@ export default function CoursesAdminPage() {
         </div>
       </Modal>
 
-      {/* Delete Confirm */}
+      {}
       <Modal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}

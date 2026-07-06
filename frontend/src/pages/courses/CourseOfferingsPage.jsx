@@ -36,7 +36,7 @@ export default function CourseOfferingsPage() {
   const [assignModal, setAssignModal] = useState(null);
   const [assignEmail, setAssignEmail] = useState('');
 
-  // Filter States
+  
   const [filterSemester, setFilterSemester] = useState('');
   const [filterYear, setFilterYear] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -192,7 +192,7 @@ export default function CourseOfferingsPage() {
         )}
       </div>
 
-      {/* Filter Section */}
+      {}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Filters</span>
@@ -283,7 +283,7 @@ export default function CourseOfferingsPage() {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
+      {}
       <Modal
         open={modal === 'create' || modal === 'edit'}
         onClose={() => setModal(null)}
@@ -320,7 +320,7 @@ export default function CourseOfferingsPage() {
             <FInput name="enrollEnds" label="Enrollment Ends" type="date" />
           </div>
 
-          {/* Meetings */}
+          {}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="form-label mb-0">Meeting Times</label>
@@ -361,7 +361,7 @@ export default function CourseOfferingsPage() {
         </div>
       </Modal>
 
-      {/* Assign Faculty */}
+      {}
       <Modal open={!!assignModal} onClose={() => setAssignModal(null)} title="Assign Faculty" size="sm"
         footer={<><Button variant="secondary" onClick={() => setAssignModal(null)}>Cancel</Button><Button loading={saving} onClick={handleAssign}>Assign</Button></>}
       >
@@ -371,7 +371,7 @@ export default function CourseOfferingsPage() {
         </div>
       </Modal>
 
-      {/* Delete */}
+      {}
       <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Offering" size="sm"
         footer={<><Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button><Button variant="danger" loading={deleting} onClick={handleDelete}>Delete</Button></>}
       >

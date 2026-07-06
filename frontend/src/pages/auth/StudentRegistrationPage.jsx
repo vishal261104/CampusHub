@@ -23,7 +23,7 @@ export default function StudentRegistrationPage() {
   const [loading, setLoading] = useState(false);
   const [generatedId, setGeneratedId] = useState(null);
 
-  // If the user already has a studentId, show a success view
+  
   if (user?.studentId && !generatedId) {
     return (
       <div className="max-w-lg mx-auto mt-12">
@@ -69,7 +69,7 @@ export default function StudentRegistrationPage() {
     }
   };
 
-  // Show success after registration
+  
   if (generatedId) {
     return (
       <div className="max-w-lg mx-auto mt-12">
@@ -149,7 +149,7 @@ export default function StudentRegistrationPage() {
             </select>
           </div>
 
-          {/* Preview */}
+          {}
           {form.year && form.branch && (
             <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">ID Preview</p>

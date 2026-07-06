@@ -1,16 +1,17 @@
 export default function errorHandler(err, req, res, next) {
     const isDev = process.env.NODE_ENV === 'development';
-    console.error({
-    message: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-  });
+    
+    
+    const status = err.statusCode || err.status || err.raw?.statusCode || 500;
+    
+    console.error(`[${req.method}] ${req.path} → ${status}:`, err.message);
 
-  return res.status(err.statusCode || 500).json({
-    error: {
-      message: isDev ? err.message : 'Internal server error',
-      code: err.code || 'INTERNAL_ERROR',
-    }
-  });
+    
+    const isClientError = status >= 400 && status < 500;
+    const message = isClientError || isDev ? err.message : 'Internal server error';
+
+    return res.status(status).json({
+        message,
+        code: err.code || 'INTERNAL_ERROR',
+    });
 }

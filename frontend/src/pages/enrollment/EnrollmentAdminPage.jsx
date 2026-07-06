@@ -74,9 +74,9 @@ export default function EnrollmentAdminPage() {
             return (
               <div key={req._id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col md:flex-row gap-5 md:items-center justify-between transition-all hover:border-slate-300">
                 
-                {/* Info Section */}
+                {}
                 <div className="flex-1 flex flex-col gap-4">
-                  {/* Top Badges */}
+                  {}
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={isEnroll ? 'primary' : 'warning'}>
                       {isEnroll ? 'Enroll Request' : 'Drop Request'}
@@ -106,7 +106,7 @@ export default function EnrollmentAdminPage() {
                   </div>
                 </div>
 
-                {/* Actions */}
+                {}
                 <div className="flex gap-2 flex-col sm:flex-row md:flex-col lg:flex-row border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-5 shrink-0 justify-center">
                   <Button 
                     variant="danger" 

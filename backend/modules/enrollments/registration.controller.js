@@ -1,6 +1,11 @@
 import * as registrationService from "./registration.service.js";
 
-// Completes student registration by generating a unique student ID based on year and branch.
+/**
+ * Controller to finalize the registration of a new student.
+ * Generates their permanent Student ID based on year and branch, and saves their details.
+ * Route: POST /api/registration/student
+ * Access: Authenticated User (with 'student' role)
+ */
 export async function registerStudent(req, res, next) {
   try {
     const result = await registrationService.registerStudent(req.user?.id, req.body);
@@ -11,7 +16,12 @@ export async function registerStudent(req, res, next) {
   }
 }
 
-// Completes faculty registration by generating a unique employee ID.
+/**
+ * Controller to finalize the registration of a new faculty member.
+ * Generates their permanent Employee ID and saves their details.
+ * Route: POST /api/registration/faculty
+ * Access: Authenticated User (with 'faculty' role)
+ */
 export async function registerFaculty(req, res, next) {
   try {
     const result = await registrationService.registerFaculty(req.user?.id, req.body);

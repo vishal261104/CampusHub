@@ -12,8 +12,8 @@ const STATUSES    = ['Open', 'In Progress', 'Resolved'];
 const CATEGORIES  = ['Electrical', 'Plumbing', 'WiFi', 'Furniture', 'Sanitation', 'Other'];
 const PRIORITIES  = ['Low', 'Medium', 'High', 'Critical'];
 
-// hostelAdmin can only move complaints to Open or In Progress.
-// Only students can mark a complaint as Resolved (from student dashboard).
+
+
 const ADMIN_STATUSES = ['Open', 'In Progress'];
 
 const statusVariant = { 'Open': 'danger', 'In Progress': 'warning', 'Resolved': 'success' };
@@ -31,8 +31,8 @@ export default function AdminComplaintsPage() {
   const [filters, setFilters]       = useState({ status: '', category: '', priority: '' });
   const [expanded, setExpanded]     = useState(null);
   const [acting, setActing]         = useState(null);
-  const [assignInputs, setAssignInputs] = useState({});  // { [complaintId]: string }
-  const [commentTexts, setCommentTexts] = useState({});  // { [complaintId]: string }
+  const [assignInputs, setAssignInputs] = useState({});  
+  const [commentTexts, setCommentTexts] = useState({});  
   const [commenting, setCommenting] = useState(null);
 
   const fetchComplaints = async () => {
@@ -100,14 +100,14 @@ export default function AdminComplaintsPage() {
 
   const toggleExpand = (id) => setExpanded(prev => prev === id ? null : id);
 
-  // Stats across all loaded complaints (unfiltered view sums)
+  
   const counts = complaints.reduce((acc, c) => { acc[c.status] = (acc[c.status] || 0) + 1; return acc; }, {});
 
   const selectCls = "text-sm border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-200";
 
   return (
     <div className="space-y-5">
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
@@ -126,7 +126,7 @@ export default function AdminComplaintsPage() {
         </button>
       </div>
 
-      {/* Stats */}
+      {}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: 'Open',        count: counts['Open']        || 0, cls: 'bg-rose-50   border-rose-100   text-rose-700' },
@@ -141,7 +141,7 @@ export default function AdminComplaintsPage() {
         ))}
       </div>
 
-      {/* Filters */}
+      {}
       <div className="flex flex-wrap gap-2">
         <select value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))} className={selectCls}>
           <option value="">All Status</option>
@@ -163,7 +163,7 @@ export default function AdminComplaintsPage() {
         )}
       </div>
 
-      {/* List */}
+      {}
       {loading ? (
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       ) : complaints.length === 0 ? (
@@ -178,7 +178,7 @@ export default function AdminComplaintsPage() {
             const isActing = acting === c._id;
             return (
               <div key={c._id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                {/* Row header */}
+                {}
                 <button
                   onClick={() => toggleExpand(c._id)}
                   className="w-full text-left px-5 py-4 flex items-start gap-3 hover:bg-slate-50 transition-colors"
@@ -216,12 +216,12 @@ export default function AdminComplaintsPage() {
                   {isOpen ? <ChevronUp size={16} className="text-slate-400 mt-1 flex-shrink-0" /> : <ChevronDown size={16} className="text-slate-400 mt-1 flex-shrink-0" />}
                 </button>
 
-                {/* Expanded detail */}
+                {}
                 {isOpen && (
                   <div className="px-5 pb-5 border-t border-slate-100 space-y-4">
                     <p className="text-sm text-slate-600 mt-4 leading-relaxed">{c.description}</p>
 
-                    {/* Status actions — admin cannot mark Resolved; only students can */}
+                    {}
                     {c.status !== 'Resolved' && (
                       <div className="flex flex-wrap gap-2 items-center">
                         {c.status === 'Open' && (
@@ -249,7 +249,7 @@ export default function AdminComplaintsPage() {
                       </div>
                     )}
 
-                    {/* Assign staff */}
+                    {}
                     {c.status !== 'Resolved' && (
                       <div>
                         <label className="block text-xs font-semibold text-slate-500 mb-1.5">
@@ -275,7 +275,7 @@ export default function AdminComplaintsPage() {
                       </div>
                     )}
 
-                    {/* Comments */}
+                    {}
                     {c.comments?.length > 0 && (
                       <div className="space-y-2">
                         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Thread</p>
@@ -299,7 +299,7 @@ export default function AdminComplaintsPage() {
                       </div>
                     )}
 
-                    {/* Admin add comment */}
+                    {}
                     <div className="flex gap-2">
                       <input
                         type="text"

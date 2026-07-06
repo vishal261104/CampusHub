@@ -18,7 +18,7 @@ export default function HostelAdminPage() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All');
-  const [acting, setActing] = useState(null); // id of row being acted on
+  const [acting, setActing] = useState(null); 
 
   const fetchApplications = async (tab = activeTab) => {
     setLoading(true);
@@ -57,7 +57,7 @@ export default function HostelAdminPage() {
 
   return (
     <div className="space-y-5">
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600">
@@ -76,7 +76,7 @@ export default function HostelAdminPage() {
         </button>
       </div>
 
-      {/* Stats row */}
+      {}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'Pending', color: 'bg-amber-50 text-amber-700 border-amber-100' },
@@ -91,9 +91,9 @@ export default function HostelAdminPage() {
         ))}
       </div>
 
-      {/* Table card */}
+      {}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        {/* Tabs */}
+        {}
         <div className="flex border-b border-slate-100 px-4 pt-2 gap-1 overflow-x-auto">
           {STATUS_TABS.map(tab => (
             <button
@@ -110,7 +110,7 @@ export default function HostelAdminPage() {
           ))}
         </div>
 
-        {/* Table */}
+        {}
         {loading ? (
           <div className="flex justify-center py-16"><Spinner size="lg" /></div>
         ) : applications.length === 0 ? (

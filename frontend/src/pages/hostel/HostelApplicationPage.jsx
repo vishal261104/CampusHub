@@ -11,7 +11,7 @@ export default function HostelApplicationPage() {
   const [submitting, setSubmitting] = useState(false);
   const [allocation, setAllocation] = useState(null);
 
-  // Form State
+  
   const [formData, setFormData] = useState({
     roomCategory: '',
     roomNumber: ''
@@ -22,8 +22,8 @@ export default function HostelApplicationPage() {
     try {
       const res = await getMyHostelApplication();
       const app = res.data.application;
-      // Only show status view for active applications (Pending / Approved)
-      // Cancelled and Rejected → show form so student can reapply
+      
+      
       if (app && (app.status === 'Pending' || app.status === 'Approved')) {
         setApplication(app);
         if (res.data.allocation) setAllocation(res.data.allocation);
@@ -101,7 +101,7 @@ export default function HostelApplicationPage() {
       </div>
 
       {application ? (
-        // --- Status View ---
+        
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
             <div className="flex items-center gap-3">
@@ -181,7 +181,7 @@ export default function HostelApplicationPage() {
           </div>
         </div>
       ) : (
-        // --- Application Form ---
+        
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-slate-800">New Application</h2>

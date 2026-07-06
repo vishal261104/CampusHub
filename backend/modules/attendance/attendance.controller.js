@@ -1,6 +1,11 @@
 import * as attendanceService from "./attendance.service.js";
 
-// Handles HTTP request to retrieve enrolled students for a course offering.
+/**
+ * Controller to fetch all enrolled students for a given course offering.
+ * Used by faculty to see who is available to mark for attendance.
+ * Route: GET /api/attendance/enrolled/:courseOfferingId
+ * Access: Faculty
+ */
 export async function getEnrolledStudents(req, res, next) {
   try {
     const students = await attendanceService.getEnrolledStudents(req.params.courseOfferingId);
@@ -11,7 +16,11 @@ export async function getEnrolledStudents(req, res, next) {
   }
 }
 
-// Handles HTTP request to mark attendance for a student.
+/**
+ * Controller to mark a student's attendance (Present/Absent/Late) for a specific date.
+ * Route: POST /api/attendance/mark
+ * Access: Faculty
+ */
 export async function markAttendance(req, res, next) {
   try {
     const attendance = await attendanceService.markAttendance(req.user.id, req.body);
@@ -22,7 +31,11 @@ export async function markAttendance(req, res, next) {
   }
 }
 
-// Handles HTTP request to retrieve the logged-in student's attendance summary.
+/**
+ * Controller to fetch aggregated attendance statistics for the logged-in student across all their courses.
+ * Route: GET /api/attendance/student
+ * Access: Student
+ */
 export async function getAttendance(req, res, next) {
   try {
     const result = await attendanceService.getAttendance(req.user.id);
@@ -32,7 +45,12 @@ export async function getAttendance(req, res, next) {
   }
 }
 
-// Handles HTTP request to retrieve attendance records for a course offering (faculty only).
+/**
+ * Controller to fetch all attendance records for a specific course offering.
+ * Used by the faculty who teaches the course to review historic attendance data.
+ * Route: GET /api/attendance/course/:courseOfferingId
+ * Access: Faculty
+ */
 export async function getCourseAttendance(req, res, next) {
   try {
     const records = await attendanceService.getCourseAttendance(req.user.id, req.params.courseOfferingId);

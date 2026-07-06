@@ -40,9 +40,9 @@ const leaveRequestSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-// Admin filtering by status (pending queue)
+
 leaveRequestSchema.index({ status: 1 });
-// Student fetching their own requests
+
 leaveRequestSchema.index({ studentId: 1 });
 
 export default mongoose.model("LeaveRequest", leaveRequestSchema);

@@ -8,7 +8,7 @@ const notificationSchema = new mongoose.Schema(
             required: true,
             index: true,
         },
-        // Notification category
+        
         type: {
             type: String,
             enum: ["fee_due_7d", "fee_due_1d", "fee_overdue", "payment_success"],
@@ -27,7 +27,7 @@ const notificationSchema = new mongoose.Schema(
             default: false,
             index: true,
         },
-        // Extra data for deep-linking (e.g. feeRecordId, paymentId)
+        
         metadata: {
             type: mongoose.Schema.Types.Mixed,
             default: {},

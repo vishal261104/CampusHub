@@ -1,6 +1,6 @@
 import SemesterConfig, { SEMESTER_LIST } from "./semesterConfig.model.js";
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+
 
 function validateSemesterName(semester) {
     if (!SEMESTER_LIST.includes(semester)) {
@@ -20,10 +20,10 @@ function validateYear(year) {
     return y;
 }
 
-// ─── SERVICE FUNCTIONS ────────────────────────────────────────────────────────
 
-// Activates a semester. Deactivates any currently active semester first.
-// Creates or updates the SemesterConfig document for the given semester+year.
+
+
+
 export async function activateSemester(adminId, { semester, year, dueDate }) {
     validateSemesterName(semester);
     const yr = validateYear(year);
@@ -40,10 +40,10 @@ export async function activateSemester(adminId, { semester, year, dueDate }) {
         throw err;
     }
 
-    // Deactivate all currently active semesters
+    
     await SemesterConfig.updateMany({ isActive: true }, { isActive: false });
 
-    // Find or create the config for this semester+year
+    
     let config = await SemesterConfig.findOne({ semester, year: yr });
     if (config) {
         config.dueDate     = due;
@@ -65,7 +65,7 @@ export async function activateSemester(adminId, { semester, year, dueDate }) {
     return config;
 }
 
-// Deactivates the currently active semester (no replacement).
+
 export async function deactivateSemester() {
     const active = await SemesterConfig.findOne({ isActive: true });
     if (!active) {
@@ -78,19 +78,19 @@ export async function deactivateSemester() {
     return active;
 }
 
-// Returns the currently active semester config, or null if none.
+
 export async function getActiveSemester() {
     return SemesterConfig.findOne({ isActive: true }).populate("activatedBy", "name email");
 }
 
-// Returns all semester configs, sorted newest first.
+
 export async function getAllSemesters() {
     return SemesterConfig.find()
         .populate("activatedBy", "name email")
         .sort({ year: -1, semester: 1 });
 }
 
-// Updates the due date for the active semester.
+
 export async function updateActiveDueDate(dueDate) {
     const active = await SemesterConfig.findOne({ isActive: true });
     if (!active) {

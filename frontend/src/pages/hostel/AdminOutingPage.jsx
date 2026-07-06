@@ -37,7 +37,7 @@ function fmtDate(date) {
   return new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-// Checks if a given date is past the threshold (for live dashboard late indicator)
+
 function checkIsLate(date, threshold) {
   if (!date || !threshold) return false;
   const d = new Date(date);
@@ -67,7 +67,7 @@ export default function AdminOutingPage() {
   const [reviewNote, setReviewNote] = useState('');
   const [reviewModal, setReviewModal] = useState(null);
 
-  // Threshold state
+  
   const [threshold, setThreshold]       = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [thHour, setThHour]             = useState('23');
@@ -143,7 +143,7 @@ export default function AdminOutingPage() {
   return (
     <div className="space-y-5">
 
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
@@ -172,7 +172,7 @@ export default function AdminOutingPage() {
         </div>
       </div>
 
-      {/* Stats */}
+      {}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: 'Currently Outside', count: liveOutings.length, cls: 'bg-amber-50 border-amber-100 text-amber-700', onClick: () => setTab('live') },
@@ -186,7 +186,7 @@ export default function AdminOutingPage() {
         ))}
       </div>
 
-      {/* Tabs */}
+      {}
       <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
         {tabDef.map(t => (
           <button
@@ -205,7 +205,7 @@ export default function AdminOutingPage() {
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       ) : (
 
-        // ── Live Dashboard ──
+        
         tab === 'live' ? (
           liveOutings.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 py-16 text-center text-slate-400">
@@ -221,7 +221,7 @@ export default function AdminOutingPage() {
                 const minsOut = Math.floor((now - outTime) / 60000);
                 const hoursOut = Math.floor(minsOut / 60);
                 const durLabel = hoursOut > 0 ? `${hoursOut}h ${minsOut % 60}m` : `${minsOut}m`;
-                // A live outing hasn't checked in yet — flag if current time is already past threshold
+                
                 const alreadyLate = threshold ? checkIsLate(now, threshold) : false;
 
                 return (
@@ -255,7 +255,7 @@ export default function AdminOutingPage() {
 
         ) : tab === 'history' ? (
 
-          // ── Outing History ──
+          
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <select value={outingFilter} onChange={e => setOutingFilter(e.target.value)} className={selectCls}>
@@ -304,7 +304,7 @@ export default function AdminOutingPage() {
 
         ) : (
 
-          // ── Leave Requests ──
+          
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               {['', 'pending', 'approved', 'rejected'].map(s => (
@@ -393,7 +393,7 @@ export default function AdminOutingPage() {
         )
       )}
 
-      {/* ── Set Threshold Modal ── */}
+      {}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowSettings(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
@@ -454,7 +454,7 @@ export default function AdminOutingPage() {
         </div>
       )}
 
-      {/* Review Modal */}
+      {}
       {reviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setReviewModal(null)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>

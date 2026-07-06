@@ -76,7 +76,7 @@ function StudentDashboard() {
         <hr className="mt-4 mb-6 border-slate-100" />
       </div>
 
-      {/* Registration banner — show if student has no studentId */}
+      {}
       {!user?.studentId && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-center gap-4 animate-slide-up">
           <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
@@ -99,7 +99,7 @@ function StudentDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Attendance chart */}
+        {}
         <div className="card p-6 lg:col-span-2">
           <h3 className="text-sm font-semibold text-slate-800 mb-4">Attendance by Course</h3>
           {loading ? <div className="h-48 flex items-center justify-center"><Spinner /></div> : chartData.length > 0 ? (
@@ -123,7 +123,7 @@ function StudentDashboard() {
           )}
         </div>
 
-        {/* Enrolled courses list */}
+        {}
         <div className="card p-6">
           <h3 className="text-sm font-semibold text-slate-800 mb-4">My Courses</h3>
           {loading ? <Spinner /> : enrollments.length === 0 ? (

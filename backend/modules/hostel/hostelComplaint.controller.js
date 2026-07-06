@@ -1,6 +1,10 @@
 import * as complaintService from "./hostelComplaint.service.js";
 
-// Handles HTTP request for a student to create a new hostel complaint.
+/**
+ * Controller for a student to raise a new complaint about their hostel room.
+ * Route: POST /api/hostel-complaints/
+ * Access: Student
+ */
 export const createComplaint = async (req, res, next) => {
     try {
         const studentId = req.userDoc._id;
@@ -12,7 +16,11 @@ export const createComplaint = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for a student to view their own complaints.
+/**
+ * Controller for a student to view their own history of raised complaints.
+ * Route: GET /api/hostel-complaints/my-complaints
+ * Access: Student
+ */
 export const getMyComplaints = async (req, res, next) => {
     try {
         const studentId = req.userDoc._id;
@@ -23,7 +31,11 @@ export const getMyComplaints = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for hostelAdmin to list all complaints with optional filters.
+/**
+ * Controller for an admin to view all complaints, with optional filtering.
+ * Route: GET /api/hostel-complaints/
+ * Access: Admin
+ */
 export const getAllComplaints = async (req, res, next) => {
     try {
         const complaints = await complaintService.getAllComplaints(req.query);
@@ -33,8 +45,12 @@ export const getAllComplaints = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request to update a complaint's status.
-// hostelAdmin can set Open/In Progress; students can mark their own as Resolved.
+/**
+ * Controller to update the status of a complaint (e.g. Open -> In Progress -> Resolved).
+ * Students can only mark as 'Resolved'. Admins manage 'Open' and 'In Progress'.
+ * Route: PATCH /api/hostel-complaints/:id/status
+ * Access: Authenticated Users (Student/Admin)
+ */
 export const updateComplaintStatus = async (req, res, next) => {
     try {
         const { status } = req.body;
@@ -48,7 +64,11 @@ export const updateComplaintStatus = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for hostelAdmin to assign a complaint to maintenance staff.
+/**
+ * Controller for an admin to assign a complaint to a specific staff/maintenance person.
+ * Route: PATCH /api/hostel-complaints/:id/assign
+ * Access: Admin
+ */
 export const assignComplaint = async (req, res, next) => {
     try {
         const { assignedTo } = req.body;
@@ -60,8 +80,12 @@ export const assignComplaint = async (req, res, next) => {
     }
 };
 
-// Handles HTTP request for students or hostelAdmin to add a comment to a complaint.
-// Students can only comment on their own complaints.
+/**
+ * Controller to add a text comment to a complaint.
+ * Students can only comment on their own complaints.
+ * Route: POST /api/hostel-complaints/:id/comments
+ * Access: Authenticated Users (Student/Admin)
+ */
 export const addComment = async (req, res, next) => {
     try {
         const { text } = req.body;
@@ -71,7 +95,7 @@ export const addComment = async (req, res, next) => {
 
         const complaintId = req.params.id;
 
-        // IDOR guard: students can only comment on their own complaints
+        
         if (req.user.role === "student") {
             const { getMyComplaints } = await import("./hostelComplaint.service.js");
             const mine = await getMyComplaints(req.userDoc._id);

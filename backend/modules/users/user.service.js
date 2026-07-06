@@ -1,6 +1,9 @@
 import User from "./user.model.js";
 
-// Retrieves a user's profile by ID.
+
+/**
+ * Fetches the user profile by user ID.
+ */
 export async function getProfile(userId) {
   if (!userId) {
     const err = new Error("Not authorized");
@@ -16,7 +19,10 @@ export async function getProfile(userId) {
   return user;
 }
 
-// Updates mutable profile fields (name, email).
+
+/**
+ * Updates the profile (name/email) of a user.
+ */
 export async function updateProfile(userId, { name, email }) {
   if (!userId) {
     const err = new Error("Not authorized");
@@ -46,7 +52,10 @@ export async function updateProfile(userId, { name, email }) {
   return updated;
 }
 
-// Updates a user's password after verifying their current password.
+
+/**
+ * Validates the current password and sets a new password for a user.
+ */
 export async function updatePassword(userId, { currentPassword, newPassword }) {
   if (!userId) {
     const err = new Error("Not authorized");
@@ -74,12 +83,18 @@ export async function updatePassword(userId, { currentPassword, newPassword }) {
   await user.save();
 }
 
-// Returns all users (admin view), excluding passwords.
+
+/**
+ * Fetches all users from the database, excluding their passwords.
+ */
 export async function getAllUsers() {
   return User.find().select('-password').sort({ createdAt: -1 });
 }
 
-// Sets a user's role by their database ID, generating employeeId for faculty/hostelAdmin.
+
+/**
+ * Updates the role and associated fields (e.g. employeeId, studentId) of a user by their user ID.
+ */
 export async function setRoleById(targetUserId, { role, gender, studentId, employeeId, joinYear, department }) {
   if (!targetUserId) {
     const err = new Error("User id param is required");
@@ -130,7 +145,10 @@ export async function setRoleById(targetUserId, { role, gender, studentId, emplo
   return updated;
 }
 
-// Sets a user's role by their email, generating employeeId for faculty/hostelAdmin.
+
+/**
+ * Updates the role and associated fields (e.g. employeeId, studentId) of a user by their email address.
+ */
 export async function setRoleByEmail({ email, role, gender, studentId, employeeId, joinYear, department }) {
   if (!email) {
     const err = new Error("email is required");

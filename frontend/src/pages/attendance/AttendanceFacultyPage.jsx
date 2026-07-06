@@ -75,11 +75,11 @@ export default function AttendanceFacultyPage() {
     if (success > 0) toast.success(`Attendance marked for ${success} student(s)`);
     if (failed > 0) toast.error(`${failed} record(s) already marked or failed`);
 
-    // Refresh the attendance history so the panel updates live
+    
     try {
       const attRes = await getCourseAttendance(selectedOffering._id);
       setExistingAttendance(attRes.data.attendance || []);
-    } catch { /* ignore */ }
+    } catch {  }
 
     if (success > 0) window.location.reload();
   };
@@ -97,7 +97,7 @@ export default function AttendanceFacultyPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Sidebar: Offerings */}
+        {}
         <div className="card overflow-hidden">
           <div className="px-4 py-3.5 border-b border-slate-100">
             <p className="text-sm font-semibold text-slate-800">My Course Offerings</p>
@@ -127,7 +127,7 @@ export default function AttendanceFacultyPage() {
           )}
         </div>
 
-        {/* Main: Mark attendance */}
+        {}
         <div className="lg:col-span-2 space-y-4">
           {!selectedOffering ? (
             <div className="card py-20 text-center text-slate-400">
@@ -212,7 +212,7 @@ export default function AttendanceFacultyPage() {
                 )}
               </div>
 
-              {/* Existing records */}
+              {}
               {existingAttendance.length > 0 && (
                 <div className="card">
                   <div className="px-5 py-3.5 border-b border-slate-100">

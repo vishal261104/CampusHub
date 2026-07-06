@@ -2,7 +2,12 @@ import CourseOffering from "../courses/courseOffering.model.js";
 import Attendance from "./attendance.model.js";
 import Enrollment from "../enrollments/enrollment.model.js";
 
-// Retrieves students enrolled in a specific course offering.
+/**
+ * Retrieves a list of students currently enrolled in a specific course offering.
+ * Filters out students who have dropped the course.
+ * @param {String} courseOfferingId - The ID of the course offering
+ * @returns {Array} List of populated student objects containing name and email
+ */
 export async function getEnrolledStudents(courseOfferingId) {
   const offering = await CourseOffering.findById(courseOfferingId).select("_id");
   if (!offering) {
@@ -21,7 +26,13 @@ export async function getEnrolledStudents(courseOfferingId) {
   return enrollments.map((enrollment) => enrollment.studentId).filter(Boolean);
 }
 
-// Marks attendance for a student in a course offering, restricted to the assigned faculty.
+/**
+ * Records a single student's attendance (Present/Absent/Late) for a specific date in a course offering.
+ * Ensures the requesting faculty is the one assigned to the course and that the student is actually enrolled.
+ * Prevents duplicate attendance records for the same student on the same date.
+ * @param {String} facultyId - ID of the faculty attempting to mark attendance
+ * @param {Object} data - Contains courseOfferingId, studentId, status, and date
+ */
 export async function markAttendance(facultyId, { courseOfferingId, studentId, status, date }) {
   const offering = await CourseOffering.findById(courseOfferingId);
   if (!offering) {
@@ -53,7 +64,12 @@ export async function markAttendance(facultyId, { courseOfferingId, studentId, s
   return attendance;
 }
 
-// Retrieves and aggregates attendance history/percentage for a student across all courses.
+/**
+ * Calculates and returns aggregated attendance statistics for a specific student across all their courses.
+ * Groups records by course offering and computes the attendance percentage.
+ * @param {String} studentId - The ID of the student
+ * @returns {Array} List of course attendance summaries including total classes, present classes, and percentage
+ */
 export async function getAttendance(studentId) {
   const records = await Attendance.find({ studentId }).populate("courseOfferingId");
 
@@ -79,7 +95,13 @@ export async function getAttendance(studentId) {
   }));
 }
 
-// Retrieves all attendance records for a course offering, restricted to assigned faculty.
+/**
+ * Retrieves all raw attendance records for a specific course offering.
+ * Ensures that only the faculty assigned to the course can view these records.
+ * @param {String} facultyId - The ID of the requesting faculty
+ * @param {String} courseOfferingId - The ID of the course offering
+ * @returns {Array} List of populated attendance records containing student details
+ */
 export async function getCourseAttendance(facultyId, courseOfferingId) {
   const offering = await CourseOffering.findById(courseOfferingId);
   if (!offering) {
