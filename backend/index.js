@@ -14,6 +14,7 @@ import feeRoutes from './modules/fees/fee.routes.js';
 import paymentRoutes from './modules/payments/payment.routes.js';
 import notificationRoutes from './modules/notifications/notification.routes.js';
 import transportRoutes from './modules/transport/transport.routes.js';
+import assessmentRoutes from './modules/assessments/assessment.routes.js';
 import errorHandler from './middleware/errorHandler.js';
 import 'dotenv/config';
 
@@ -86,6 +87,7 @@ app.use('/api/fees', feeRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/transport', transportRoutes);
+app.use('/api/assessments', assessmentRoutes);
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });

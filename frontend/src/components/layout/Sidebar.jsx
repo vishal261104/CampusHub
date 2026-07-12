@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BookOpen, GraduationCap, CalendarCheck, ClipboardList,
-  Settings, LogOut, ChevronRight, BookMarked, ClipboardCheck, Home, Users, BedDouble, MessageSquare, DoorOpen, IndianRupee, Bus
+  Settings, LogOut, ChevronRight, BookMarked, ClipboardCheck, Home, Users, BedDouble, MessageSquare, DoorOpen, IndianRupee, Bus, BarChart2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ProfileCard from '../ui/ProfileCard';
@@ -19,12 +19,14 @@ const navConfig = {
     { label: 'Outing & Leave', to: '/hostel/outing', icon: DoorOpen },
     { label: 'My Fees', to: '/fees/my-fees', icon: IndianRupee },
     { label: 'Transport', to: '/transport', icon: Bus },
+    { label: 'My Results', to: '/assessments/my', icon: BarChart2 },
   ],
   faculty: [
     { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
     { label: 'Course Catalog', to: '/courses/catalog', icon: BookOpen },
     { label: 'My Offerings', to: '/courses/offerings', icon: BookMarked },
     { label: 'Mark Attendance', to: '/attendance/mark', icon: ClipboardCheck },
+    { label: 'Assessments', to: '/assessments/faculty', icon: BarChart2 },
   ],
   admin: [
     { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
