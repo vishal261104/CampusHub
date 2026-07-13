@@ -2,6 +2,7 @@ import Assessment from "./assessment.model.js";
 import Mark from "./mark.model.js";
 import CourseOffering from "../courses/courseOffering.model.js";
 import Enrollment from "../enrollments/enrollment.model.js";
+import { announceAssessmentPublished } from "../announcements/announcement.automation.js";
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
@@ -147,7 +148,20 @@ export async function advanceAssessmentStatus(facultyId, assessmentId) {
     const updateData = { status: next };
     if (next === "Published") updateData.publishedAt = new Date();
 
-    return Assessment.findByIdAndUpdate(assessmentId, updateData, { new: true });
+    const updated = await Assessment.findByIdAndUpdate(assessmentId, updateData, { new: true });
+
+    // Auto-announce when published
+    if (next === "Published") {
+        const offering = await CourseOffering.findById(updated.courseOfferingId)
+            .populate("courseId", "courseTitle courseCode")
+            .lean();
+        const courseName = offering?.courseId?.courseTitle || offering?.courseId?.courseCode || "your course";
+        announceAssessmentPublished(updated, courseName).catch(err =>
+            console.warn('[automation] announceAssessmentPublished failed:', err.message)
+        );
+    }
+
+    return updated;
 }
 
 /**

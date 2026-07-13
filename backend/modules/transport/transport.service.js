@@ -4,6 +4,7 @@ import BusSchedule from "./busSchedule.model.js";
 import Ticket from "./ticket.model.js";
 import TimetableSlot from "./timetableSlot.model.js";
 import BusGuidelines from "./busGuidelines.model.js";
+import { announceNewBus, announceBusDeactivated } from "../announcements/announcement.automation.js";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 if (!stripeKey || stripeKey.includes('your_stripe_secret_key_here')) {
@@ -29,7 +30,10 @@ function assertStripeConfigured() {
  * @param {Object} data - Bus details (busNumber, registrationNumber, capacity, fare, conductor, etc.)
  */
 export async function createBus(data) {
-    return await Bus.create(data);
+    const bus = await Bus.create(data);
+    // Auto-announce new bus to all students
+    announceNewBus(bus).catch(err => console.warn('[automation] announceNewBus failed:', err.message));
+    return bus;
 }
 
 /**
@@ -40,6 +44,10 @@ export async function createBus(data) {
 export async function updateBus(id, data) {
     const bus = await Bus.findByIdAndUpdate(id, data, { new: true });
     if (!bus) throw Object.assign(new Error("Bus not found"), { status: 404 });
+    // Auto-announce if bus was deactivated
+    if (data.isActive === false) {
+        announceBusDeactivated(bus).catch(err => console.warn('[automation] announceBusDeactivated failed:', err.message));
+    }
     return bus;
 }
 
@@ -99,6 +107,7 @@ export async function deleteSchedule(id) {
     const schedule = await BusSchedule.findByIdAndUpdate(id, { status: "Cancelled" }, { new: true });
     if (!schedule) throw Object.assign(new Error("Schedule not found"), { status: 404 });
 
+    // Notify individual ticket holders via private notifications
     try {
         const { createNotification } = await import("../notifications/notification.service.js");
         const tickets = await Ticket.find({ scheduleId: id, bookingStatus: "Booked" }).populate("studentId");
@@ -116,6 +125,11 @@ export async function deleteSchedule(id) {
     } catch (err) {
         console.error("[Transport] Failed to notify students of cancelled trip:", err.message);
     }
+
+    // Also publish a public announcement about the cancellation
+    import("../announcements/announcement.automation.js")
+        .then(({ announceBusScheduleCancelled }) => announceBusScheduleCancelled?.(schedule))
+        .catch(err => console.warn('[automation] announceBusScheduleCancelled failed:', err.message));
 
     return schedule;
 }

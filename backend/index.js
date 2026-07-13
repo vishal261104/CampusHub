@@ -15,6 +15,7 @@ import paymentRoutes from './modules/payments/payment.routes.js';
 import notificationRoutes from './modules/notifications/notification.routes.js';
 import transportRoutes from './modules/transport/transport.routes.js';
 import assessmentRoutes from './modules/assessments/assessment.routes.js';
+import announcementRoutes from './modules/announcements/announcement.routes.js';
 import errorHandler from './middleware/errorHandler.js';
 import 'dotenv/config';
 
@@ -88,6 +89,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/transport', transportRoutes);
 app.use('/api/assessments', assessmentRoutes);
+app.use('/api/announcements', announcementRoutes);
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
@@ -104,13 +106,20 @@ connectDB()
       console.log('Server link: http://localhost:' + PORT);
     });
 
-    
-    
+    // ── Private fee due notifications (per-user, 1h interval) ──────────────────
     import('./modules/notifications/notification.service.js').then(({ scanDueFeeNotifications }) => {
       scanDueFeeNotifications().catch(err => console.warn('[cron] due-fee scan failed:', err.message));
       setInterval(() => {
         scanDueFeeNotifications().catch(err => console.warn('[cron] due-fee scan failed:', err.message));
-      }, 60 * 60 * 1000); 
+      }, 60 * 60 * 1000); // every hour
+    });
+
+    // ── Public automated announcements (broadcast, 1h interval) ────────────────
+    import('./modules/announcements/announcement.automation.js').then(({ runAllAutomatedScans }) => {
+      runAllAutomatedScans().catch(err => console.warn('[cron] announcement scan failed:', err.message));
+      setInterval(() => {
+        runAllAutomatedScans().catch(err => console.warn('[cron] announcement scan failed:', err.message));
+      }, 60 * 60 * 1000); // every hour
     });
   })
   .catch((err) => {

@@ -55,7 +55,7 @@ function StudentDashboard() {
     : 0;
 
   const chartData = attendance.slice(0, 5).map((a) => ({
-    name: a.courseOffering?.courseId?.courseCode || 'Course',
+    name: a.courseOffering?.courseId?.courseTitle || 'Course',
     attendance: Math.round(a.percentage || 0),
   }));
 

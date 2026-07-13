@@ -85,8 +85,8 @@ export default function AttendanceStudentPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">{item.courseOffering?.courseId?.courseCode || 'Unknown'}</p>
-                      <p className="text-xs text-slate-400">{item.courseOffering?.semester} {item.courseOffering?.year}</p>
+                      <p className="text-sm font-semibold text-slate-800">{item.courseOffering?.courseId?.courseTitle || 'Unknown'}</p>
+                      <p className="text-xs text-slate-400">{item.courseOffering?.courseId?.courseCode} · {item.courseOffering?.semester} {item.courseOffering?.year}</p>
                     </div>
                     <Badge variant={variant}>{pct >= 75 ? '✓ OK' : pct >= 50 ? '⚠ Low' : '✗ Critical'}</Badge>
                   </div>

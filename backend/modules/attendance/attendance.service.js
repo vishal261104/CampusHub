@@ -71,7 +71,10 @@ export async function markAttendance(facultyId, { courseOfferingId, studentId, s
  * @returns {Array} List of course attendance summaries including total classes, present classes, and percentage
  */
 export async function getAttendance(studentId) {
-  const records = await Attendance.find({ studentId }).populate("courseOfferingId");
+  const records = await Attendance.find({ studentId }).populate({
+    path: "courseOfferingId",
+    populate: { path: "courseId" }
+  });
 
   const attendanceMap = {};
   for (const record of records) {

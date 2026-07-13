@@ -1,4 +1,5 @@
 import FeeStructure, { FEE_CATEGORIES_LIST, FEE_SEMESTERS_LIST } from "./feeStructure.model.js";
+import { announceFeeStructureChange } from "../announcements/announcement.automation.js";
 
 
 
@@ -82,6 +83,12 @@ export async function createFeeStructure(adminId, { category, label, amount, yea
         semester,
         description: description?.trim() || "",
         createdBy: adminId,
+    }).then(fee => {
+        // Auto-announce the new fee structure to all students
+        announceFeeStructureChange(fee, "created").catch(err =>
+            console.warn('[automation] announceFeeStructureChange failed:', err.message)
+        );
+        return fee;
     });
 }
 
@@ -175,6 +182,10 @@ export async function updateFeeStructure(id, { category, label, amount, year, se
     fee.description = newDescription;
 
     await fee.save();
+    // Auto-announce the fee structure update to all students
+    announceFeeStructureChange(fee, "updated").catch(err =>
+        console.warn('[automation] announceFeeStructureChange failed:', err.message)
+    );
     return fee;
 }
 

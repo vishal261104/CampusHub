@@ -13,6 +13,7 @@ const pageTitles = {
   '/attendance/my': 'My Attendance',
   '/attendance/mark': 'Mark Attendance',
   '/profile': 'Profile & Settings',
+  '/announcements': 'Announcements',
 };
 
 export default function AppShell() {
